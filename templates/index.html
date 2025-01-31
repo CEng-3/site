@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>RPi Stream Test</title>
+	<style>
+		body {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			font-family: Arial, sans-serif;
+			margin: 20px;
+		}
+		h1 {
+			color: #333;
+		}
+		.video-container {
+			margin-top: 20px;
+			border: 2px solid #333;
+			border-radius: 8px;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+	<h1>Raspberry Pi Stream Test</h1>
+	<div class="video-container">
+		<img src="{{ url_for('video_feed') }}" width="640" height = "480">
+	</div>
+</body>
+</html>
