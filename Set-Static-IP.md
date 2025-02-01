@@ -4,9 +4,15 @@
 4. Choose wireless connection and press Settings cog
 5. Click IPv4 Settings tab
 6. Change method to Manual
-7. Set IP to 192.168.1.100
-8. Set Netmask to 255.255.255.0
-9. **TO DETERMINE GATEWAY:** Run command:
+7. Determine IP
+```
+ip a
+```
+8. Determine Netmask
+```
+ifconfig | grep -i mask
+```
+9. Determine gateway
 ```
 ip route | grep default
 ```
