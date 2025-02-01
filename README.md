@@ -13,7 +13,6 @@ source venv/bin/activate
 4. Install Python libraries
 ```
 pip install flask
-pip install gunicorn
 ```
 5. Install system libraries
 ```
@@ -29,4 +28,4 @@ ln -s /usr/lib/python3/dist-packages/cv2.* .
 python3 app.py
 ```
 
-Visit 192.168.1.100:5000 in Chromium
+Visit localhost:5000 in Chromium
