@@ -1,30 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>RPi Stream Test</title>
-	<style>
-		body {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			font-family: Arial, sans-serif;
-			margin: 20px;
-		}
-		h1 {
-			color: #333;
-		}
-		.video-container {
-			margin-top: 20px;
-			border: 2px solid #333;
-			border-radius: 8px;
-			overflow: hidden;
-		}
-	</style>
+    <title>RPi Stream Test</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid #333;
+            border-bottom: none;
+            background-color: #f0f0f0;
+        }
+        .tab.active {
+            background-color: #ddd;
+        }
+        .content {
+            display: none;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            width: 660px;
+            text-align: center;
+        }
+        .content.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-	<h1>Raspberry Pi Stream Test</h1>
-	<div class="video-container">
-		<img src="{{ url_for('video_feed') }}" width="640" height = "480">
-	</div>
+    <h1>Raspberry Pi Stream Test</h1>
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('video')">Video Feed</div>
+        <div class="tab" onclick="showTab('timelapse')">Timelapse</div>
+    </div>
+    
+    <div id="video" class="content active">
+        <img src="{{ url_for('video_feed') }}" width="640" height="480">
+    </div>
+    
+    <div id="timelapse" class="content">
+        <p>Timelapse content will be displayed here.</p>
+    </div>
+    
+    <script>
+        function showTab(tabId) {
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
 </body>
 </html>
