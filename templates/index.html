@@ -1,60 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>RPi Stream Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aeroponic Tower Monitoring</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            color: #333;
-        }
+        /* Custom CSS for tabs */
         .tabs {
+            margin: 2rem 0;
+        }
+        
+        .tabs nav {
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .tabs ul {
             display: flex;
-            margin-bottom: 20px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
         }
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: 1px solid #333;
-            border-bottom: none;
-            background-color: #f0f0f0;
+        
+        .tabs li {
+            margin-right: 1rem;
         }
-        .tab.active {
-            background-color: #ddd;
+        
+        .tabs a {
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            color: #333;
+            border-radius: 0.25rem 0.25rem 0 0;
+            transition: all 0.2s;
         }
-        .content {
+        
+        .tabs a.active,
+        .tabs a:hover {
+            background: #f8f9fa;
+            color: #000;
+            border-bottom: 2px solid #007bff;
+        }
+        
+        .tab-content {
             display: none;
-            border: 2px solid #333;
-            border-radius: 8px;
-            padding: 20px;
-            width: 660px;
+            padding: 1rem 0;
             text-align: center;
         }
-        .content.active {
+        
+        .tab-content.active {
             display: block;
+        }
+        
+        .camera-grid {
+            display: flex;
+            justify-content: center;
         }
     </style>
 </head>
 <body>
-    <h1>Raspberry Pi Stream Test</h1>
-    <div class="tabs">
-        <div class="tab active" onclick="showTab('video')">Video Feed</div>
-        <div class="tab" onclick="showTab('timelapse')">Timelapse</div>
-    </div>
-    
-    <div id="video" class="content active">
-        <img src="{{ url_for('video_feed') }}" width="640" height="480">
-    </div>
-    
-    <div id="timelapse" class="content">
-        <p>Timelapse content will be displayed here.</p>
-    </div>
-    
+    <main class="container">
+        <h1>Aeroponic Tower Monitoring</h1>
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <nav>
+                <ul>
+                    <li><a href="#live-feed" class="active">Live Feed</a></li>
+                    <li><a href="#timelapse">Timelapse</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Live Feed Content -->
+        <div id="live-feed" class="tab-content active">
+            <h2>Live Camera Feed</h2>
+            <div class="camera-grid">
+                <div class="camera-feed">
+                    <img src="{{ url_for('video_feed') }}" width="640" height="480">
+                </div>
+            </div>
+        </div>
+
+        <!-- Timelapse Content -->
+        <div id="timelapse" class="tab-content">
+            <h2>Timelapse Recordings</h2>
+            <p>Timelapse content will be displayed here.</p>
+        </div>
+    </main>
+
+    <script>
+        // Simple tab switching functionality
+        document.querySelectorAll('.tabs a').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all tabs and content
+                document.querySelectorAll('.tabs a, .tab-content').forEach(element => {
+                    element.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                document.querySelector(tab.getAttribute('href')).classList.add('active');
+            });
+        });
+    </script>
+
     <script>
         function showTab(tabId) {
             document.querySelectorAll('.content').forEach(content => {
@@ -68,5 +118,6 @@
             event.target.classList.add('active');
         }
     </script>
+
 </body>
 </html>
