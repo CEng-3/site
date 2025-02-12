@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+</head>
+<body>
+    <main class="container">
+        <h1>System Settings</h1>
+        <form>
+            <h2>System Configuration</h2>
+            <!-- Add your settings form elements here -->
+            <div class="grid">
+                <label for="watering-interval">
+                    Watering Interval
+                    <input type="number" id="watering-interval" name="watering-interval" placeholder="Minutes">
+                </label>
+                <label for="light-duration">
+                    Light Duration
+                    <input type="number" id="light-duration" name="light-duration" placeholder="Hours">
+                </label>
+            </div>
+            
+            <h2>Security</h2>
+            <a href="/logout" class="button">Logout</a>
+        </form>
+    </main>
+</body>
+</html>
