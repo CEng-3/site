@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aeroponic Tower Monitoring</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Custom CSS for tabs */
         .tabs {
@@ -55,9 +57,29 @@
             display: flex;
             justify-content: center;
         }
+
+        /* Settings icon styling */
+        .settings-icon {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: #f8f9fa;
+            z-index: 1000;
+            transition: color 0.3s ease;
+        }
+
+        .settings-icon:hover {
+            color: #007bff;
+        }
     </style>
 </head>
 <body>
+    <!-- Settings Icon -->
+    <a href="/settings" class="settings-icon">
+        <i class="fas fa-cog"></i>
+    </a>
+
     <main class="container">
         <h1>Aeroponic Tower Monitoring</h1>
         <!-- Tabs Navigation -->
@@ -104,20 +126,5 @@
             });
         });
     </script>
-
-    <script>
-        function showTab(tabId) {
-            document.querySelectorAll('.content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
-        }
-    </script>
-
 </body>
 </html>
