@@ -64,19 +64,36 @@
             top: 1rem;
             right: 1rem;
             font-size: 1.5rem;
-            color: #f8f9fa;
             z-index: 1000;
             transition: color 0.3s ease;
+            /* Use CSS variables for theme adaptation */
+            color: var(--contrast);
+            background-color: var(--card-background-color);
+            padding: 0.5rem;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .settings-icon:hover {
-            color: #007bff;
+            color: var(--primary);
+        }
+
+        /* Media query for browsers that don't support CSS variables */
+        @media (prefers-color-scheme: dark) {
+            .settings-icon {
+                color: #ffffff;
+            }
+        }
+        @media (prefers-color-scheme: light) {
+            .settings-icon {
+                color: #333333;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Settings Icon -->
-    <a href="/settings" class="settings-icon">
+    <a href="/settings" class="settings-icon" aria-label="Settings">
         <i class="fas fa-cog"></i>
     </a>
 
