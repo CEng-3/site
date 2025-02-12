@@ -1,6 +1,7 @@
 1. Create a directory
 ```
 mkdir flask-site
+cd flask-site
 ```
 2. Create a virtual environment
 ```
