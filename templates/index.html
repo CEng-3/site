@@ -59,19 +59,21 @@
         }
 
         /* Settings icon styling */
-        .settings-icon {
+                .settings-icon {
             position: fixed;
             top: 1rem;
             right: 1rem;
             font-size: 1.5rem;
             z-index: 1000;
             transition: color 0.3s ease;
-            /* Use CSS variables for theme adaptation */
+            /* Remove background and padding */
             color: var(--contrast);
+            /* Remove these properties:
             background-color: var(--card-background-color);
             padding: 0.5rem;
             border-radius: 50%;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            */
         }
 
         .settings-icon:hover {
@@ -103,10 +105,15 @@
         <div class="tabs">
             <nav>
                 <ul>
+                    <li><a href="#sensors" class="active">Sensors</a></li>
                     <li><a href="#live-feed" class="active">Live Feed</a></li>
                     <li><a href="#timelapse">Timelapse</a></li>
                 </ul>
             </nav>
+        </div>
+
+        <div id="sensors" class="tab-content active">
+            <!-- Empty content area for sensors -->
         </div>
 
         <!-- Live Feed Content -->
