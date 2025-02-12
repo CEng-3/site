@@ -10,20 +10,18 @@
     <main class="container">
         <h1>System Settings</h1>
         <form>
-            <h2>System Configuration</h2>
-            <!-- Add your settings form elements here -->
+            <h2>Timelapse Configuration</h2>
             <div class="grid">
-                <label for="watering-interval">
-                    Watering Interval
-                    <input type="number" id="watering-interval" name="watering-interval" placeholder="Minutes">
+                <label for="hours-to-run">
+                    Hours to Run
+                    <input type="number" id="hours-to-run" name="hours-to-run" placeholder="Hours">
                 </label>
-                <label for="light-duration">
-                    Light Duration
-                    <input type="number" id="light-duration" name="light-duration" placeholder="Hours">
+                <label for="images-per-hour">
+                    Images per hour
+                    <input type="number" id="images-per-hour" name="images-per-hour" placeholder="Images">
                 </label>
             </div>
             
-            <h2>Security</h2>
             <a href="/logout" class="button">Logout</a>
         </form>
     </main>
