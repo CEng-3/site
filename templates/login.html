@@ -5,8 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <link rel="icon" type="image/x-icon" href="tus-icon.ico">
+
+    <style>
+        .logo {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            transition: transform 0.3s ease;
+          }
+      
+          .logo img {
+            /* border-radius: 8px; */
+            /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+            width: 120px;
+            height: 48px;
+          }
+          </style>
+        
 </head>
 <body>
+    <a href="#" class="logo">
+        <picture>
+          <source srcset="TUS-Logo-White.png" media="(prefers-color-scheme: dark)">
+          <source srcset="TUS-Logo-Black.png" media="(prefers-color-scheme: light)">
+          <img src="TUS-Logo-Black.png" alt="TUS Logo"> <!-- Fallback -->
+        </picture>
+      </a>
+
     <main class="container">
         <h1>Settings Login</h1>
         {% if error %}

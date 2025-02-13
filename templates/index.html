@@ -1,154 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aeroponic Tower Monitoring</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-    <!-- Add Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* Custom CSS for tabs */
-        .tabs {
-            margin: 2rem 0;
-        }
-        
-        .tabs nav {
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .tabs ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .tabs li {
-            margin-right: 1rem;
-        }
-        
-        .tabs a {
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            color: #333;
-            border-radius: 0.25rem 0.25rem 0 0;
-            transition: all 0.2s;
-        }
-        
-        .tabs a.active,
-        .tabs a:hover {
-            background: #f8f9fa;
-            color: #000;
-            border-bottom: 2px solid #007bff;
-        }
-        
-        .tab-content {
-            display: none;
-            padding: 1rem 0;
-            text-align: center;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .camera-grid {
-            display: flex;
-            justify-content: center;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aeroponic Tower Monitoring</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" type="image/x-icon" href="tus-icon.ico">
+  <style>
+    /* Logo styling */
+    .logo {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+      transition: transform 0.3s ease;
+    }
 
-        /* Settings icon styling */
-                .settings-icon {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            font-size: 1.5rem;
-            z-index: 1000;
-            transition: color 0.3s ease;
-            /* Remove background and padding */
-            color: var(--contrast);
-            /* Remove these properties:
-            background-color: var(--card-background-color);
-            padding: 0.5rem;
-            border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            */
-        }
+    .logo img {
+      /* border-radius: 8px; */
+      /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+      width: 120px;
+      height: 48px;
+    }
 
-        .settings-icon:hover {
-            color: var(--primary);
-        }
+    /* .logo:hover {
+      transform: scale(1.05);
+    } */
 
-        /* Media query for browsers that don't support CSS variables */
-        @media (prefers-color-scheme: dark) {
-            .settings-icon {
-                color: #ffffff;
-            }
-        }
-        @media (prefers-color-scheme: light) {
-            .settings-icon {
-                color: #333333;
-            }
-        }
-    </style>
+    /* Custom CSS for tabs */
+    .tabs {
+      margin: 2rem 0;
+    }
+    
+    .tabs nav {
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .tabs ul {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .tabs li {
+      margin-right: 1rem;
+    }
+    
+    .tabs a {
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      /* The default color will be set by the media queries below */
+      border-radius: 0.25rem 0.25rem 0 0;
+      transition: all 0.2s;
+    }
+    
+    /* Default active and hover states (base styles; overridden per theme below) */
+    .tabs a.active,
+    .tabs a:hover {
+      background: #f8f9fa;
+      border-bottom: 2px solid #007bff;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 1rem 0;
+      text-align: center;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .camera-grid {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Settings icon styling */
+    .settings-icon {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      z-index: 1000;
+      transition: color 0.3s ease;
+      color: var(--contrast);
+    }
+
+    .settings-icon:hover {
+      color: var(--primary);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .logo img {
+        width: 40px;
+        height: 40px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+        margin-top: 2.5rem;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .settings-icon {
+        color: #ffffff;
+      }
+    }
+    @media (prefers-color-scheme: light) {
+      .settings-icon {
+        color: #333333;
+      }
+    }
+
+    /* Tab text color adjustments */
+    @media (prefers-color-scheme: light) {
+      .tabs a {
+        color: #000; /* Black text in light mode */
+      }
+      .tabs a.active,
+      .tabs a:hover {
+        background: #f8f9fa;
+        color: #000; /* Ensure active/hover text is black in light mode */
+        border-bottom: 2px solid #007bff;
+      }
+      /* Title styling in light mode */
+      h1 {
+        color: #000;
+      }
+      /* Ensure text inside the tab content is black */
+      .tab-content h2,
+      .tab-content p {
+        color: #000;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .tabs a {
+        color: #fff; /* White text in dark mode */
+      }
+      .tabs a.active,
+      .tabs a:hover {
+        background: #555; /* Darker background for active/hover in dark mode */
+        color: #fff; /* Keep active/hover text white in dark mode */
+        border-bottom: 2px solid #007bff;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Settings Icon -->
-    <a href="/settings" class="settings-icon" aria-label="Settings">
-        <i class="fas fa-cog"></i>
-    </a>
+  <!-- Logo -->
+  <a href="#" class="logo">
+    <picture>
+      <source srcset="TUS-Logo-White.png" media="(prefers-color-scheme: dark)">
+      <source srcset="TUS-Logo-Black.png" media="(prefers-color-scheme: light)">
+      <img src="TUS-Logo-Black.png" alt="TUS Logo"> <!-- Fallback -->
+    </picture>
+  </a>
 
-    <main class="container">
-        <h1>Aeroponic Tower Monitoring</h1>
-        <!-- Tabs Navigation -->
-        <div class="tabs">
-            <nav>
-                <ul>
-                    <li><a href="#sensors" class="active">Sensors</a></li>
-                    <li><a href="#live-feed" class="active">Live Feed</a></li>
-                    <li><a href="#timelapse">Timelapse</a></li>
-                </ul>
-            </nav>
+  <!-- Settings Icon -->
+  <a href="/settings" class="settings-icon" aria-label="Settings">
+    <i class="fas fa-cog"></i>
+  </a>
+
+  <main class="container">
+    <h1>Aeroponic Tower Monitoring</h1>
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+      <nav>
+        <ul>
+          <li><a href="#sensors" class="active">Sensors</a></li>
+          <li><a href="#live-feed">Live Feed</a></li>
+          <li><a href="#timelapse">Timelapse</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div id="sensors" class="tab-content active">
+      <!-- Empty content area for sensors -->
+    </div>
+
+    <!-- Live Feed Content -->
+    <div id="live-feed" class="tab-content">
+      <h2>Live Camera Feed</h2>
+      <div class="camera-grid">
+        <div class="camera-feed">
+          <img src="{{ url_for('video_feed') }}" width="640" height="480">
         </div>
+      </div>
+    </div>
 
-        <div id="sensors" class="tab-content active">
-            <!-- Empty content area for sensors -->
-        </div>
+    <!-- Timelapse Content -->
+    <div id="timelapse" class="tab-content">
+      <h2>Timelapse Recordings</h2>
+      <p>Timelapse content will be displayed here.</p>
+    </div>
+  </main>
 
-        <!-- Live Feed Content -->
-        <div id="live-feed" class="tab-content active">
-            <h2>Live Camera Feed</h2>
-            <div class="camera-grid">
-                <div class="camera-feed">
-                    <img src="{{ url_for('video_feed') }}" width="640" height="480">
-                </div>
-            </div>
-        </div>
-
-        <!-- Timelapse Content -->
-        <div id="timelapse" class="tab-content">
-            <h2>Timelapse Recordings</h2>
-            <p>Timelapse content will be displayed here.</p>
-        </div>
-    </main>
-
-    <script>
-        // Simple tab switching functionality
-        document.querySelectorAll('.tabs a').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                // Remove active class from all tabs and content
-                document.querySelectorAll('.tabs a, .tab-content').forEach(element => {
-                    element.classList.remove('active');
-                });
-                
-                // Add active class to clicked tab and corresponding content
-                tab.classList.add('active');
-                document.querySelector(tab.getAttribute('href')).classList.add('active');
-            });
+  <script>
+    // Simple tab switching functionality
+    document.querySelectorAll('.tabs a').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Remove active class from all tabs and content
+        document.querySelectorAll('.tabs a, .tab-content').forEach(element => {
+          element.classList.remove('active');
         });
-    </script>
+        
+        // Add active class to clicked tab and corresponding content
+        tab.classList.add('active');
+        document.querySelector(tab.getAttribute('href')).classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>
