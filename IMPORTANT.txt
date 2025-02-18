@@ -1,5 +1,0 @@
-FOLDER STRUCTURE MUST BE LIKE THIS:
-
- - livestream-site.py
- - /templates/
-  - index.html
