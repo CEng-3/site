@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
   <!-- Add Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="icon" type="image/x-icon" href="tus-icon.ico">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='tus-icon.ico') }}">
   <style>
     /* Logo styling */
     .logo {
@@ -157,11 +157,11 @@
   <!-- Logo -->
   <a href="#" class="logo">
     <picture>
-      <source srcset="TUS-Logo-White.png" media="(prefers-color-scheme: dark)">
-      <source srcset="TUS-Logo-Black.png" media="(prefers-color-scheme: light)">
-      <img src="TUS-Logo-Black.png" alt="TUS Logo"> <!-- Fallback -->
+      <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)">
+      <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)">
+      <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo">
     </picture>
-  </a>
+  </a>  
 
   <!-- Settings Icon -->
   <a href="/settings" class="settings-icon" aria-label="Settings">
