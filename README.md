@@ -67,6 +67,7 @@ ln -s /usr/lib/python3/dist-packages/cv2.* .
 10. Run the website locally
 
 ```
+cd ../../../..
 python3 app.py
 ```
 
