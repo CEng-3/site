@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Aeroponic Tower Monitoring</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css"
+  />
   <!-- Add Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='tus-icon.ico') }}">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  />
+  <link
+    rel="icon"
+    type="image/x-icon"
+    href="{{ url_for('static', filename='tus-icon.ico') }}"
+  />
   <style>
     /* Logo styling */
     .logo {
@@ -17,63 +27,48 @@
       z-index: 1001;
       transition: transform 0.3s ease;
     }
-
     .logo img {
-      /* border-radius: 8px; */
-      /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
       width: 120px;
       height: 48px;
     }
 
-    /* .logo:hover {
-      transform: scale(1.05);
-    } */
-
-    /* Custom CSS for tabs */
+    /* Tabs */
     .tabs {
       margin: 2rem 0;
     }
-    
     .tabs nav {
       border-bottom: 1px solid #dee2e6;
     }
-    
     .tabs ul {
       display: flex;
       list-style: none;
       margin: 0;
       padding: 0;
     }
-    
     .tabs li {
       margin-right: 1rem;
     }
-    
     .tabs a {
       text-decoration: none;
       padding: 0.5rem 1rem;
-      /* The default color will be set by the media queries below */
       border-radius: 0.25rem 0.25rem 0 0;
       transition: all 0.2s;
     }
-    
-    /* Default active and hover states (base styles; overridden per theme below) */
     .tabs a.active,
     .tabs a:hover {
       background: #f8f9fa;
       border-bottom: 2px solid #007bff;
     }
-    
     .tab-content {
       display: none;
       padding: 1rem 0;
       text-align: center;
     }
-    
     .tab-content.active {
       display: block;
     }
-    
+
+    /* Camera feed grid */
     .camera-grid {
       display: flex;
       justify-content: center;
@@ -89,7 +84,6 @@
       transition: color 0.3s ease;
       color: var(--contrast);
     }
-
     .settings-icon:hover {
       color: var(--primary);
     }
@@ -100,55 +94,116 @@
         width: 40px;
         height: 40px;
       }
-      
       h1 {
         font-size: 1.5rem;
         margin-top: 2.5rem;
       }
     }
 
-    @media (prefers-color-scheme: dark) {
-      .settings-icon {
-        color: #ffffff;
-      }
-    }
-    @media (prefers-color-scheme: light) {
-      .settings-icon {
-        color: #333333;
-      }
-    }
-
     /* Tab text color adjustments */
     @media (prefers-color-scheme: light) {
       .tabs a {
-        color: #000; /* Black text in light mode */
+        color: #000;
       }
       .tabs a.active,
       .tabs a:hover {
         background: #f8f9fa;
-        color: #000; /* Ensure active/hover text is black in light mode */
+        color: #000;
         border-bottom: 2px solid #007bff;
       }
-      /* Title styling in light mode */
       h1 {
         color: #000;
       }
-      /* Ensure text inside the tab content is black */
       .tab-content h2,
       .tab-content p {
         color: #000;
       }
     }
-
     @media (prefers-color-scheme: dark) {
       .tabs a {
-        color: #fff; /* White text in dark mode */
+        color: #fff;
       }
       .tabs a.active,
       .tabs a:hover {
-        background: #555; /* Darker background for active/hover in dark mode */
-        color: #fff; /* Keep active/hover text white in dark mode */
+        background: #555;
+        color: #fff;
         border-bottom: 2px solid #007bff;
+      }
+    }
+
+    /* 230° Arc Gauge Styling */
+    .arc-gauge {
+      display: block;
+      margin: -2rem auto; /* center the gauge */
+      width: 325px; /* increased size */
+      height: 325px; /* increased size */
+    }
+    .arc-gauge .track {
+      fill: none;
+      stroke-width: 10; /* scaled up from 10 */
+      stroke-linecap: round;
+    }
+    .arc-gauge .progress {
+      fill: none;
+      stroke: #007bff;
+      stroke-width: 10; /* scaled up from 10 */
+      stroke-linecap: round;
+      stroke-dasharray: 160.57; /* remains the same relative to the viewBox */
+      stroke-dashoffset: 160.57;
+      transition: stroke-dashoffset 1s ease;
+    }
+    .arc-gauge .percentage {
+      fill: #007bff;
+      font-size: 20px; /* increased font size for better readability */
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .arc-gauge .gauge-subtext {
+        font-size: 8px;      /* smaller size */
+        font-weight: 600;
+        text-anchor: middle;
+        dominant-baseline: middle;
+    }
+      
+    .history-btn-container {
+        text-align: center;
+        margin: 1rem 0;
+    }
+    .btn-history {
+        text-decoration: none;
+        color: inherit; /* Keeps text color consistent with theme */
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.25rem;
+        padding: 0.75rem 1.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        border: 2px solid #ccc;
+        background-color: transparent;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    /* Semi-transparent highlight with rounded corners on hover */
+    .btn-history:hover {
+        background-color: rgba(100, 100, 100, 0.1); /* Adjust the alpha for more or less transparency */
+        border-color: #ccc;
+    }
+      
+    @media (prefers-color-scheme: light) {
+      .arc-gauge .track {
+        stroke: #ccc;
+      }
+      .arc-gauge .arc-subtext {
+        fill: #000;
+      }
+    }
+    @media (prefers-color-scheme: dark) {
+      .arc-gauge .track {
+        stroke: #444;
+      }
+      arc-gauge .gauge-subtext {
+        fill: #fff;
       }
     }
   </style>
@@ -157,11 +212,20 @@
   <!-- Logo -->
   <a href="#" class="logo">
     <picture>
-      <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)">
-      <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)">
-      <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo">
+      <source
+        srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}"
+        media="(prefers-color-scheme: dark)"
+      />
+      <source
+        srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
+        media="(prefers-color-scheme: light)"
+      />
+      <img
+        src="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
+        alt="TUS Logo"
+      />
     </picture>
-  </a>  
+  </a>
 
   <!-- Settings Icon -->
   <a href="/settings" class="settings-icon" aria-label="Settings">
@@ -170,6 +234,7 @@
 
   <main class="container">
     <h1>Aeroponic Tower Monitoring</h1>
+
     <!-- Tabs Navigation -->
     <div class="tabs">
       <nav>
@@ -181,21 +246,62 @@
       </nav>
     </div>
 
+    <!-- Sensors Tab -->
     <div id="sensors" class="tab-content active">
-      <!-- Empty content area for sensors -->
+        
+      <!-- 230° Arc Gauge (SVG) -->
+      <svg class="arc-gauge" viewBox="0 0 100 100">
+        <!-- This path from (13.75,66.90) to (86.25,66.90) spans 230° at r=40 -->
+        <path
+          class="track"
+          d="M 13.75,66.90
+             A 40 40 0 1 1 86.25,66.90"
+        />
+        <path
+          class="progress"
+          d="M 13.75,66.90
+             A 40 40 0 1 1 86.25,66.90"
+        />
+        <!-- Text in the center of the SVG (50,50) -->
+        <text class="percentage" x="50" y="47">0%</text>
+        <!-- Subtext for water level -->
+          <text class="gauge-subtext" x="50" y="68">Water level</text>
+      </svg>
+
+      <!-- pH Gauge  -->
+      <svg class="arc-gauge arc-gauge-ph" viewBox="0 0 100 100">
+        <path
+          class="track"
+          d="M 13.75,66.90
+             A 40 40 0 1 1 86.25,66.90"
+        />
+        <path
+          class="progress"
+          d="M 13.75,66.90
+             A 40 40 0 1 1 86.25,66.90"
+        />
+        <text class="percentage" x="50" y="47">7.0</text>
+        <text class="gauge-subtext" x="50" y="68">pH level</text>
+      </svg>
+      
+      <div class="history-btn-container">
+        <a href="/sensor_history" class="btn-history">
+          <i class="fas fa-history"></i> View History
+        </a>
+      </div>
     </div>
 
-    <!-- Live Feed Content -->
+    <!-- Live Feed Tab -->
     <div id="live-feed" class="tab-content">
       <h2>Live Camera Feed</h2>
       <div class="camera-grid">
         <div class="camera-feed">
-          <img src="{{ url_for('video_feed') }}" width="640" height="480">
+          <img src="{{ url_for('video_feed') }}" width="640" height="480" />
         </div>
       </div>
     </div>
 
-    <!-- Timelapse Content -->
+    <!-- Timelapse Tab -->
     <div id="timelapse" class="tab-content">
       <h2>Timelapse Recordings</h2>
       <p>Timelapse content will be displayed here.</p>
@@ -203,21 +309,102 @@
   </main>
 
   <script>
-    // Simple tab switching functionality
-    document.querySelectorAll('.tabs a').forEach(tab => {
+    // Simple tab switching
+    document.querySelectorAll('.tabs a').forEach((tab) => {
       tab.addEventListener('click', (e) => {
         e.preventDefault();
-        
-        // Remove active class from all tabs and content
-        document.querySelectorAll('.tabs a, .tab-content').forEach(element => {
-          element.classList.remove('active');
-        });
-        
-        // Add active class to clicked tab and corresponding content
+        document
+          .querySelectorAll('.tabs a, .tab-content')
+          .forEach((element) => element.classList.remove('active'));
+
         tab.classList.add('active');
-        document.querySelector(tab.getAttribute('href')).classList.add('active');
+        document
+          .querySelector(tab.getAttribute('href'))
+          .classList.add('active');
       });
     });
+
+    /*
+      230° ARC GAUGE SCRIPT
+      Arc length for 230° at radius=40 => ~160.57
+      stroke-dasharray is set to 160.57. We adjust stroke-dashoffset
+      so the portion of the arc is revealed based on sensorPercentage.
+    */
+      document.addEventListener('DOMContentLoaded', function() {
+        const totalArcLength = 160.57; // arc length for both gauges
+
+        // --- Water Level Gauge ---
+        const sensorPercentage = 75; // Example water level percentage (0-100)
+        const waterGauge = document.querySelector('.arc-gauge:not(.arc-gauge-ph)');
+        const waterProgressPath = waterGauge.querySelector('.progress');
+        const waterLabel = waterGauge.querySelector('.percentage');
+
+        setTimeout(() => {
+          const waterOffset = totalArcLength - (sensorPercentage / 100) * totalArcLength;
+          waterProgressPath.style.strokeDashoffset = waterOffset.toFixed(2);
+          waterLabel.textContent = sensorPercentage + '%';
+        }, 100); // slight delay for animation
+
+        // --- pH Gauge ---
+        const sensorPH = 1; // Example pH value (0-14). Adjust as needed.
+        const phGauge = document.querySelector('.arc-gauge-ph');
+        const phProgressPath = phGauge.querySelector('.progress');
+        const phLabel = phGauge.querySelector('.percentage');
+
+        setTimeout(() => {
+          // Calculate offset based on the 0–14 range.
+          const phOffset = totalArcLength - (sensorPH / 14) * totalArcLength;
+          phProgressPath.style.strokeDashoffset = phOffset.toFixed(2);
+          phLabel.textContent = sensorPH.toFixed(1);
+
+          // Determine color based on pH value.
+          const phColor = getPHColor(sensorPH);
+          // Apply the color to both the progress arc and the text.
+          phProgressPath.style.stroke = phColor;
+          phLabel.style.fill = phColor;
+        }, 100);
+
+        // Helper function to return a color based on pH
+        function getPHColor(ph) {
+          // Example mapping – adjust these ranges/colors as desired:
+          if (ph < 4) return "#FF0000";        // Red for very acidic
+          else if (ph < 7) return "#FFA500";     // Orange for moderately acidic
+          else if (Math.abs(ph - 7) < 0.1) return "#00FF00"; // Green for neutral
+          else if (ph < 10) return "#0000FF";    // Blue for moderately alkaline
+          else return "#800080";               // Purple for very alkaline
+        }
+        
+        // Function to fetch the pH data from Flask and update the gauge
+        async function updatePH() {
+          try {
+            const response = await fetch('/ph_data');
+            const data = await response.json();
+            const phValue = data.ph; // e.g., 7.2
+
+            // Calculate offset based on 0-14 range
+            const phOffset = totalArcLength - (phValue / 14) * totalArcLength;
+            phProgressPath.style.strokeDashoffset = phOffset.toFixed(2);
+            phLabel.textContent = phValue.toFixed(1);
+
+            // Update color
+            const phColor = getPHColor(phValue);
+            phProgressPath.style.stroke = phColor;
+            phLabel.style.fill = phColor;
+          } catch (error) {
+            console.error('Error fetching pH data:', error);
+          }
+        }
+
+        // Call updatePH() every 5 seconds (adjust as needed)
+        setInterval(updatePH, 5000);
+
+        // Optionally call once right away so the gauge updates quickly on page load
+        updatePH();
+
+      });
+
+    // Update the text label
+    label.textContent = sensorPercentage + '%';
   </script>
 </body>
 </html>

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sensor History</title>
+  
+  <!-- Pico.css -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css"
+  />
+  
+  <!-- Font Awesome for icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  />
+  
+  <!-- Favicon -->
+  <link
+    rel="icon"
+    type="image/x-icon"
+    href="{{ url_for('static', filename='tus-icon.ico') }}"
+  />
+
+  <!-- Flatpickr CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+  />
+  <!-- Flatpickr - Dark theme -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css"
+    media="(prefers-color-scheme: dark)"
+  />
+  
+  <style>
+    /* TUS Logo styling */
+    .logo {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+    }
+    .logo img {
+      width: 120px;
+      height: 48px;
+    }
+
+    /* Page-level Close (X) button */
+    .close-button {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      z-index: 1001;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .close-button:hover i {
+      color: red !important;
+    }
+
+    /* Header styling for title and underline */
+    header {
+      text-align: center;
+      /* Decrease top margin for tighter spacing */
+      margin-top: 2rem;
+    }
+    .header-title {
+      margin: 0;
+      font-size: 2rem;
+    }
+    /* Reduce bottom margin of underline */
+    .header-underline {
+      width: 80%;
+      max-width: 500px;
+      margin: 0.25rem auto 1rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    /* Moved Download button container near top */
+    .history-btn-container {
+      text-align: center;
+      /* Decrease vertical margin for less spacing */
+      margin: 0.5rem 0;
+    }
+    .btn-history {
+      text-decoration: none;
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.25rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      border: 2px solid #ccc;
+      background-color: transparent;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-history:hover {
+      background-color: rgba(100, 100, 100, 0.1);
+      border-color: #ccc;
+    }
+
+    /* Filter section styling */
+    .filter-section {
+      /* Reduce top/bottom margins for tighter spacing */
+      margin: 0.5rem auto;
+      max-width: 500px;
+      text-align: left;
+      text-indent: 5px;
+    }
+    .filter-section label {
+      font-weight: bold;
+      /* Remove extra spacing around label and dropdown */
+      margin-right: 0.5rem;
+    }
+    .filter-section select {
+      padding: 0.4rem;
+      font-size: 1rem;
+    }
+
+    /* Modal container (common) */
+    .modal {
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto; /* allows scroll if content is tall */
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Modal content */
+    .modal-content {
+      padding: 1.5rem;
+      border-radius: 4px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    /* Modal header - Title centered, X in top-right */
+    .modal-header {
+      position: relative;
+      margin-bottom: 1rem;
+      padding-top: 3rem; /* extra space at the top */
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      line-height: 1;
+      text-align: center;
+    }
+    .modal-underline {
+      width: 80%;
+      max-width: 500px;
+      margin: 0.5rem auto 1rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .modal-close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: transparent;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      width: 1.5rem;
+      height: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      padding: 0;
+    }
+    .modal-close:focus {
+      outline: 2px auto #fff;
+      outline-offset: 0;
+    }
+    .modal-close:hover i {
+      color: red !important;
+    }
+
+    /* Labels and inputs (base) */
+    .modal-content label {
+      display: block;
+      margin: 0.5rem 0 0.25rem;
+      font-weight: bold;
+    }
+    .modal-content input[type="text"] {
+      border: 1px solid;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Green Apply button with tick icon */
+    .btn-apply {
+      margin: 0.5rem auto;
+      background-color: #28a745; /* green */
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.4rem 0.75rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+    }
+    .btn-apply:hover {
+      background-color: #218838; /* darker green */
+    }
+
+    /* Keep the Flatpickr calendar above everything */
+    .flatpickr-calendar {
+      z-index: 99999 !important;
+    }
+
+    /* Centering class for the Flatpickr popup */
+    .centered-popup {
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      margin: 0 !important;
+    }
+
+    /*
+      LIGHT THEME OVERRIDES
+      - When system/browser is in light mode
+    */
+    @media (prefers-color-scheme: light) {
+      .modal-content {
+        background-color: #fff;
+        color: #000;
+      }
+      .modal-content input[type="text"] {
+        background-color: #fff;
+        color: #000;
+        border-color: #ccc;
+      }
+      .modal-header h2 {
+        color: #000;
+      }
+      .modal-close i {
+        color: #000;
+      }
+      .close-button i {
+        color: #000;
+      }
+      .close-button {
+        color: #000;
+      }
+      .modal-content label {
+        color: #444;
+      }
+    }
+
+    /*
+      DARK THEME OVERRIDES
+      - When system/browser is in dark mode
+    */
+    @media (prefers-color-scheme: dark) {
+      .modal-content {
+        background-color: #2a2a2a;
+        color: #f0f0f0;
+      }
+      .modal-content input[type="text"] {
+        background-color: #111;
+        color: #fff;
+        border-color: #444;
+      }
+      .modal-header h2 {
+        color: #ddd;
+      }
+      .modal-close i {
+        color: #fff;
+      }
+      .close-button i {
+        color: var(--contrast, #fff);
+      }
+      .close-button {
+        color: var(--contrast, #fff);
+      }
+      .modal-content label {
+        color: #bbb;
+      }
+    }
+
+    /* Mobile improvements */
+    @media (max-width: 600px) {
+      .modal-content {
+        width: 95%;
+        padding: 1rem;
+      }
+      .modal-content input[type="text"] {
+        font-size: 1rem;
+      }
+      .btn-apply {
+        font-size: 1rem;
+        padding: 0.5rem 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo at top left -->
+  <a href="#" class="logo">
+    <picture>
+      <source
+        srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}"
+        media="(prefers-color-scheme: dark)"
+      />
+      <source
+        srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
+        media="(prefers-color-scheme: light)"
+      />
+      <img
+        src="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
+        alt="TUS Logo"
+      />
+    </picture>
+  </a>
+
+  <!-- X button at top right (page-level) -->
+  <a href="/" class="close-button" aria-label="Close">
+    <i class="fas fa-times"></i>
+  </a>
+  
+  <!-- Header with Sensor History title -->
+  <header>
+    <h1 class="header-title">Sensor History</h1>
+    <div class="header-underline"></div>
+  </header>
+  
+  <!-- Moved Download button container near the top -->
+  <div class="history-btn-container">
+    <a id="downloadBtn" href="/download?filter=today" class="btn-history">
+        <i class="fas fa-download"></i> Download
+    </a>
+  </div>
+
+  <main class="container">
+    <!-- Filter dropdown section (closer spacing) -->
+    <section class="filter-section">
+      <label for="filter">Filter table:</label>
+      <select name="filter" id="filter">
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="this_month">This Month</option>
+        <option value="custom">Custom</option>
+      </select>
+    </section>
+
+    <!-- Container for the history table -->
+    <section id="history-table-container">
+      <!-- The table will be dynamically generated here -->
+    </section>
+  </main>
+  
+  <!-- Modal for Custom Date Selection -->
+  <div id="customModal" class="modal">
+    <div class="modal-content">
+      <!-- Modal header with centered title and X in top right -->
+      <div class="modal-header">
+        <h2>Select Date Range</h2>
+        <button id="closeModal" class="modal-close" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
+        <!-- Underline under the title -->
+        <div class="modal-underline"></div>
+      </div>
+      
+      <label for="startDate">Start Date:</label>
+      <input type="text" id="startDate" name="startDate" placeholder="Pick a date">
+      
+      <label for="endDate">End Date:</label>
+      <input type="text" id="endDate" name="endDate" placeholder="Pick a date">
+      
+      <div>
+        <!-- Green Apply button with a tick icon -->
+        <button id="applyDates" class="btn-apply">
+          <i class="fas fa-check"></i> Apply
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flatpickr JS -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js"
+    defer
+  ></script>
+  
+  <script>
+    // Listen for changes in the filter dropdown
+    document.getElementById('filter').addEventListener('change', function() {
+      if (this.value === 'custom') {
+        // Show the modal popup
+        document.getElementById('customModal').style.display = 'flex';
+      }
+    });
+
+    // Close the modal when the X in the modal header is clicked
+    document.getElementById('closeModal').addEventListener('click', function() {
+      document.getElementById('customModal').style.display = 'none';
+      // Reset the dropdown to "Today"
+      document.getElementById('filter').value = 'today';
+    });
+
+    // Handle Apply button in the modal
+    document.getElementById('applyDates').addEventListener('click', function() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      if (!startDate || !endDate) {
+        alert('Please select both start and end dates.');
+        return;
+      }
+      // Here you could add code to update your sensor history table based on the selected date range.
+      console.log('Selected date range:', startDate, 'to', endDate);
+      // Hide the modal after applying
+      document.getElementById('customModal').style.display = 'none';
+    });
+
+    // Initialize Flatpickr on window load
+    window.addEventListener('load', () => {
+      flatpickr('#startDate', {
+        dateFormat: 'd-m-Y',
+        disableMobile: true,
+        maxDate: 'today',
+        onOpen: (selectedDates, dateStr, instance) => {
+          instance.calendarContainer.classList.add('centered-popup');
+        },
+        onClose: (selectedDates, dateStr, instance) => {
+          instance.calendarContainer.classList.remove('centered-popup');
+        }
+      });
+
+      flatpickr('#endDate', {
+        dateFormat: 'd-m-Y',
+        disableMobile: true,
+        maxDate: 'today',
+        onOpen: (selectedDates, dateStr, instance) => {
+          instance.calendarContainer.classList.add('centered-popup');
+        },
+        onClose: (selectedDates, dateStr, instance) => {
+          instance.calendarContainer.classList.remove('centered-popup');
+        }
+      });
+    });
+      
+    // Function to build the table HTML from the data
+    function buildTable(data) {
+        let html = '<table>';
+        html += '<thead><tr><th>Date</th><th>Time</th><th>pH Level</th></tr></thead>';
+        html += '<tbody>';
+        data.forEach(row => {
+        html += `<tr>
+                    <td>${row.date}</td>
+                    <td>${row.time}</td>
+                    <td>${row.ph}</td>
+                    </tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById('history-table-container').innerHTML = html;
+    }
+
+    // Function to fetch data from the backend based on filter parameters
+    function fetchHistoryData(filter, startDate = '', endDate = '') {
+        let url = `/get_csv_data?filter=${filter}`;
+        if (filter === 'custom' && startDate && endDate) {
+        url += `&start=${startDate}&end=${endDate}`;
+        }
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            buildTable(data);
+        })
+        .catch(err => console.error('Error fetching data:', err));
+    }
+
+    // Default fetch on page load (for "today")
+    window.addEventListener('load', () => {
+        fetchHistoryData('today');
+    });
+
+    // Listen for changes on the filter dropdown
+    document.getElementById('filter').addEventListener('change', function() {
+        if (this.value === 'custom') {
+        // Show the modal popup for custom date selection (already in your code)
+        document.getElementById('customModal').style.display = 'flex';
+        } else {
+        // Fetch data for selected filter option (today, yesterday, or this_month)
+        fetchHistoryData(this.value);
+        }
+    });
+
+    // Handle Apply button in the modal for custom date filtering
+    document.getElementById('applyDates').addEventListener('click', function() {
+        const startDateInput = document.getElementById('startDate').value;
+        const endDateInput = document.getElementById('endDate').value;
+        if (!startDateInput || !endDateInput) {
+        alert('Please select both start and end dates.');
+        return;
+        }
+        // Close the modal after applying
+        document.getElementById('customModal').style.display = 'none';
+        // Fetch data for custom date range; ensure the dates are formatted as expected (e.g., "d-m-Y")
+        fetchHistoryData('custom', startDateInput, endDateInput);
+    });
+      
+    function updateDownloadLink() {
+        const filter = document.getElementById('filter').value;
+        let url = `/download?filter=${filter}`;
+          
+          if (filter === 'custom') {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            if (startDate && endDate) {
+              url += `&start=${startDate}&end=${endDate}`;
+            }
+          }
+          
+          document.getElementById('downloadBtn').href = url;
+        }
+
+        // Update download link when filter changes
+        document.getElementById('filter').addEventListener('change', updateDownloadLink);
+
+        // Update link after custom dates are applied
+        document.getElementById('applyDates').addEventListener('click', function() {
+          // The custom date modal code
+          const startDate = document.getElementById('startDate').value;
+          const endDate = document.getElementById('endDate').value;
+          if (!startDate || !endDate) {
+            alert('Please select both start and end dates.');
+            return;
+          }
+          document.getElementById('customModal').style.display = 'none';
+          updateDownloadLink();
+        });
+
+        // Also update the download link on page load
+        window.addEventListener('load', updateDownloadLink);
+  </script>
+</body>
+</html>
