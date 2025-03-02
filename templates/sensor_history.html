@@ -66,14 +66,12 @@
     /* Header styling for title and underline */
     header {
       text-align: center;
-      /* Decrease top margin for tighter spacing */
       margin-top: 2rem;
     }
     .header-title {
       margin: 0;
       font-size: 2rem;
     }
-    /* Reduce bottom margin of underline */
     .header-underline {
       width: 80%;
       max-width: 500px;
@@ -81,10 +79,9 @@
       border-bottom: 1px solid #dee2e6;
     }
 
-    /* Moved Download button container near top */
+    /* Button container styling */
     .history-btn-container {
       text-align: center;
-      /* Decrease vertical margin for less spacing */
       margin: 0.5rem 0;
     }
     .btn-history {
@@ -99,15 +96,82 @@
       border: 2px solid #ccc;
       background-color: transparent;
       transition: background-color 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
     }
     .btn-history:hover {
       background-color: rgba(100, 100, 100, 0.1);
       border-color: #ccc;
     }
 
+    /* Add spacing below the Download button */
+    .btn-download {
+      margin-bottom: 1rem;
+    }
+
+    /* Toggle switch styling */
+    .toggle-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+      .history-btn-container {
+        /* Use flex layout in column direction to stack items */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* centers them horizontally */
+        margin: 0.5rem 0;
+      }
+
+      .toggle-container {
+        /* Keep the toggle icons in a row inside this container, but it’ll be stacked
+           * as one "block" above the download button. */
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem; /* add spacing under toggle */
+      }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
     /* Filter section styling */
     .filter-section {
-      /* Reduce top/bottom margins for tighter spacing */
       margin: 0.5rem auto;
       max-width: 500px;
       text-align: left;
@@ -115,7 +179,6 @@
     }
     .filter-section label {
       font-weight: bold;
-      /* Remove extra spacing around label and dropdown */
       margin-right: 0.5rem;
     }
     .filter-section select {
@@ -131,7 +194,7 @@
       top: 0;
       width: 100%;
       height: 100%;
-      overflow: auto; /* allows scroll if content is tall */
+      overflow: auto;
       background-color: rgba(0, 0, 0, 0.5);
       display: none;
       align-items: center;
@@ -149,11 +212,11 @@
       position: relative;
     }
 
-    /* Modal header - Title centered, X in top-right */
+    /* Modal header */
     .modal-header {
       position: relative;
       margin-bottom: 1rem;
-      padding-top: 3rem; /* extra space at the top */
+      padding-top: 3rem;
     }
     .modal-header h2 {
       margin: 0;
@@ -192,7 +255,7 @@
       color: red !important;
     }
 
-    /* Labels and inputs (base) */
+    /* Labels and inputs */
     .modal-content label {
       display: block;
       margin: 0.5rem 0 0.25rem;
@@ -206,10 +269,10 @@
       box-sizing: border-box;
     }
 
-    /* Green Apply button with tick icon */
+    /* Green Apply button */
     .btn-apply {
       margin: 0.5rem auto;
-      background-color: #28a745; /* green */
+      background-color: #28a745;
       color: #fff;
       border: none;
       border-radius: 4px;
@@ -223,15 +286,13 @@
       gap: 0.3rem;
     }
     .btn-apply:hover {
-      background-color: #218838; /* darker green */
+      background-color: #218838;
     }
 
-    /* Keep the Flatpickr calendar above everything */
+    /* Flatpickr calendar z-index */
     .flatpickr-calendar {
       z-index: 99999 !important;
     }
-
-    /* Centering class for the Flatpickr popup */
     .centered-popup {
       position: fixed !important;
       top: 50% !important;
@@ -240,10 +301,7 @@
       margin: 0 !important;
     }
 
-    /*
-      LIGHT THEME OVERRIDES
-      - When system/browser is in light mode
-    */
+    /* Light theme overrides */
     @media (prefers-color-scheme: light) {
       .modal-content {
         background-color: #fff;
@@ -257,13 +315,7 @@
       .modal-header h2 {
         color: #000;
       }
-      .modal-close i {
-        color: #000;
-      }
-      .close-button i {
-        color: #000;
-      }
-      .close-button {
+      .modal-close i, .close-button i {
         color: #000;
       }
       .modal-content label {
@@ -271,10 +323,7 @@
       }
     }
 
-    /*
-      DARK THEME OVERRIDES
-      - When system/browser is in dark mode
-    */
+    /* Dark theme overrides */
     @media (prefers-color-scheme: dark) {
       .modal-content {
         background-color: #2a2a2a;
@@ -288,14 +337,8 @@
       .modal-header h2 {
         color: #ddd;
       }
-      .modal-close i {
+      .modal-close i, .close-button i {
         color: #fff;
-      }
-      .close-button i {
-        color: var(--contrast, #fff);
-      }
-      .close-button {
-        color: var(--contrast, #fff);
       }
       .modal-content label {
         color: #bbb;
@@ -317,9 +360,12 @@
       }
     }
   </style>
+
+  <!-- Chart.js library for graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- Logo at top left -->
+  <!-- Logo -->
   <a href="#" class="logo">
     <picture>
       <source
@@ -337,28 +383,43 @@
     </picture>
   </a>
 
-  <!-- X button at top right (page-level) -->
+  <!-- X button -->
   <a href="/" class="close-button" aria-label="Close">
     <i class="fas fa-times"></i>
   </a>
   
-  <!-- Header with Sensor History title -->
+  <!-- Header -->
   <header>
     <h1 class="header-title">Sensor History</h1>
     <div class="header-underline"></div>
   </header>
   
-  <!-- Moved Download button container near the top -->
+  <!-- Button container with the Download button above the toggle switch -->
   <div class="history-btn-container">
-    <a id="downloadBtn" href="/download?filter=today" class="btn-history">
-        <i class="fas fa-download"></i> Download
+    <!-- Toggle switch container FIRST -->
+    <div class="toggle-container">
+      <span>
+        <i class="fas fa-table"></i> <strong>Table</strong>
+      </span>
+      <label class="switch">
+        <input type="checkbox" id="toggleViewSwitch" checked>
+        <span class="slider"></span>
+      </label>
+      <span>
+        <i class="fas fa-chart-line"></i> <strong>Graph</strong>
+      </span>
+    </div>
+
+    <!-- Download button SECOND -->
+    <a id="downloadBtn" href="/download?filter=today" class="btn-history btn-download">
+      <i class="fas fa-download"></i> Download
     </a>
   </div>
-
+  
   <main class="container">
-    <!-- Filter dropdown section (closer spacing) -->
+    <!-- Filter dropdown -->
     <section class="filter-section">
-      <label for="filter">Filter table:</label>
+      <label for="filter">Filter graph / table:</label>
       <select name="filter" id="filter">
         <option value="today">Today</option>
         <option value="yesterday">Yesterday</option>
@@ -367,22 +428,26 @@
       </select>
     </section>
 
-    <!-- Container for the history table -->
-    <section id="history-table-container">
-      <!-- The table will be dynamically generated here -->
+    <!-- Table view container (hidden by default) -->
+    <section id="history-table-container" style="display: none;">
+      <!-- Table will be generated here -->
+    </section>
+
+    <!-- Graph view container (visible by default) -->
+    <section id="graph-view-container" style="display: block;">
+      <canvas id="phChart"></canvas>
+      <canvas id="waterChart"></canvas>
     </section>
   </main>
   
   <!-- Modal for Custom Date Selection -->
   <div id="customModal" class="modal">
     <div class="modal-content">
-      <!-- Modal header with centered title and X in top right -->
       <div class="modal-header">
         <h2>Select Date Range</h2>
         <button id="closeModal" class="modal-close" aria-label="Close">
           <i class="fas fa-times"></i>
         </button>
-        <!-- Underline under the title -->
         <div class="modal-underline"></div>
       </div>
       
@@ -393,7 +458,6 @@
       <input type="text" id="endDate" name="endDate" placeholder="Pick a date">
       
       <div>
-        <!-- Green Apply button with a tick icon -->
         <button id="applyDates" class="btn-apply">
           <i class="fas fa-check"></i> Apply
         </button>
@@ -408,36 +472,172 @@
   ></script>
   
   <script>
-    // Listen for changes in the filter dropdown
+    // Toggle between Table and Graph views using the switch
+    document.getElementById('toggleViewSwitch').addEventListener('change', function() {
+      const tableContainer = document.getElementById('history-table-container');
+      const graphContainer = document.getElementById('graph-view-container');
+      if (this.checked) {
+        tableContainer.style.display = 'none';
+        graphContainer.style.display = 'block';
+      } else {
+        graphContainer.style.display = 'none';
+        tableContainer.style.display = 'block';
+      }
+    });
+
+    // Listen for changes in the filter dropdown to show custom modal if needed
     document.getElementById('filter').addEventListener('change', function() {
       if (this.value === 'custom') {
-        // Show the modal popup
         document.getElementById('customModal').style.display = 'flex';
       }
     });
 
-    // Close the modal when the X in the modal header is clicked
+    // Close the modal when the X is clicked
     document.getElementById('closeModal').addEventListener('click', function() {
       document.getElementById('customModal').style.display = 'none';
-      // Reset the dropdown to "Today"
       document.getElementById('filter').value = 'today';
     });
 
-    // Handle Apply button in the modal
+    // Global variables for chart instances and current data
+    let phChart;
+    let waterChart;
+    let currentData = [];
+
+    // Function to build the table view
+    function buildTable(data) {
+      let html = '<table>';
+      html += '<thead><tr><th>Date</th><th>Time</th><th>pH</th><th>Water</th></tr></thead>';
+      html += '<tbody>';
+      data.forEach(row => {
+        html += `<tr>
+                    <td>${row.date}</td>
+                    <td>${row.time}</td>
+                    <td>${row.ph}</td>
+                    <td>${row.water}%</td>
+                  </tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('history-table-container').innerHTML = html;
+    }
+
+    // Function to update the graphs using Chart.js
+    function updateGraphs(data) {
+      // Assume each data row contains 'date', 'time', 'ph', and 'water'
+      const labels = data.map(row => `${row.date} ${row.time}`);
+      const phValues = data.map(row => parseFloat(row.ph));
+      const waterValues = data.map(row => parseFloat(row.water));
+
+      // pH chart
+      if (phChart) {
+        phChart.data.labels = labels;
+        phChart.data.datasets[0].data = phValues;
+        phChart.update();
+      } else {
+        const ctxPh = document.getElementById('phChart').getContext('2d');
+        phChart = new Chart(ctxPh, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'pH Level',
+              data: phValues,
+              borderColor: 'green',
+              backgroundColor: 'rgba(0, 255, 0, 0.1)',
+            }]
+          },
+          options: {
+            responsive: true,
+          }
+        });
+      }
+
+      // Water Level chart
+      if (waterChart) {
+        waterChart.data.labels = labels;
+        waterChart.data.datasets[0].data = waterValues;
+        waterChart.update();
+      } else {
+        const ctxWater = document.getElementById('waterChart').getContext('2d');
+        waterChart = new Chart(ctxWater, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Water Level',
+              data: waterValues,
+              borderColor: 'blue',
+              backgroundColor: 'rgba(0, 0, 255, 0.1)',
+            }]
+          },
+          options: {
+            responsive: true,
+          }
+        });
+      }
+    }
+
+    // Function to fetch data from the backend based on filter parameters
+    function fetchHistoryData(filter, startDate = '', endDate = '') {
+      let url = `/get_csv_data?filter=${filter}`;
+      if (filter === 'custom' && startDate && endDate) {
+        url += `&start=${startDate}&end=${endDate}`;
+      }
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          currentData = data;
+          buildTable(data);
+          updateGraphs(data);
+        })
+        .catch(err => console.error('Error fetching data:', err));
+    }
+
+    // Default fetch on page load (for "today")
+    window.addEventListener('load', () => {
+      fetchHistoryData('today');
+    });
+
+    // Listen for changes on the filter dropdown to fetch data
+    document.getElementById('filter').addEventListener('change', function() {
+      if (this.value === 'custom') {
+        document.getElementById('customModal').style.display = 'flex';
+      } else {
+        fetchHistoryData(this.value);
+      }
+    });
+
+    // Handle Apply button in the modal for custom date filtering
     document.getElementById('applyDates').addEventListener('click', function() {
-      const startDate = document.getElementById('startDate').value;
-      const endDate = document.getElementById('endDate').value;
-      if (!startDate || !endDate) {
+      const startDateInput = document.getElementById('startDate').value;
+      const endDateInput = document.getElementById('endDate').value;
+      if (!startDateInput || !endDateInput) {
         alert('Please select both start and end dates.');
         return;
       }
-      // Here you could add code to update your sensor history table based on the selected date range.
-      console.log('Selected date range:', startDate, 'to', endDate);
-      // Hide the modal after applying
       document.getElementById('customModal').style.display = 'none';
+      fetchHistoryData('custom', startDateInput, endDateInput);
+      updateDownloadLink();
     });
+      
+    // Update download link based on filter and dates
+    function updateDownloadLink() {
+      const filter = document.getElementById('filter').value;
+      let url = `/download?filter=${filter}`;
+      if (filter === 'custom') {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        if (startDate && endDate) {
+          url += `&start=${startDate}&end=${endDate}`;
+        }
+      }
+      document.getElementById('downloadBtn').href = url;
+    }
 
-    // Initialize Flatpickr on window load
+    // Update download link when filter changes and on page load
+    document.getElementById('filter').addEventListener('change', updateDownloadLink);
+    window.addEventListener('load', updateDownloadLink);
+
+    // Initialize Flatpickr for date inputs
     window.addEventListener('load', () => {
       flatpickr('#startDate', {
         dateFormat: 'd-m-Y',
@@ -463,100 +663,6 @@
         }
       });
     });
-      
-    // Function to build the table HTML from the data
-    function buildTable(data) {
-        let html = '<table>';
-        html += '<thead><tr><th>Date</th><th>Time</th><th>pH Level</th></tr></thead>';
-        html += '<tbody>';
-        data.forEach(row => {
-        html += `<tr>
-                    <td>${row.date}</td>
-                    <td>${row.time}</td>
-                    <td>${row.ph}</td>
-                    </tr>`;
-        });
-        html += '</tbody></table>';
-        document.getElementById('history-table-container').innerHTML = html;
-    }
-
-    // Function to fetch data from the backend based on filter parameters
-    function fetchHistoryData(filter, startDate = '', endDate = '') {
-        let url = `/get_csv_data?filter=${filter}`;
-        if (filter === 'custom' && startDate && endDate) {
-        url += `&start=${startDate}&end=${endDate}`;
-        }
-        fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            buildTable(data);
-        })
-        .catch(err => console.error('Error fetching data:', err));
-    }
-
-    // Default fetch on page load (for "today")
-    window.addEventListener('load', () => {
-        fetchHistoryData('today');
-    });
-
-    // Listen for changes on the filter dropdown
-    document.getElementById('filter').addEventListener('change', function() {
-        if (this.value === 'custom') {
-        // Show the modal popup for custom date selection (already in your code)
-        document.getElementById('customModal').style.display = 'flex';
-        } else {
-        // Fetch data for selected filter option (today, yesterday, or this_month)
-        fetchHistoryData(this.value);
-        }
-    });
-
-    // Handle Apply button in the modal for custom date filtering
-    document.getElementById('applyDates').addEventListener('click', function() {
-        const startDateInput = document.getElementById('startDate').value;
-        const endDateInput = document.getElementById('endDate').value;
-        if (!startDateInput || !endDateInput) {
-        alert('Please select both start and end dates.');
-        return;
-        }
-        // Close the modal after applying
-        document.getElementById('customModal').style.display = 'none';
-        // Fetch data for custom date range; ensure the dates are formatted as expected (e.g., "d-m-Y")
-        fetchHistoryData('custom', startDateInput, endDateInput);
-    });
-      
-    function updateDownloadLink() {
-        const filter = document.getElementById('filter').value;
-        let url = `/download?filter=${filter}`;
-          
-          if (filter === 'custom') {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            if (startDate && endDate) {
-              url += `&start=${startDate}&end=${endDate}`;
-            }
-          }
-          
-          document.getElementById('downloadBtn').href = url;
-        }
-
-        // Update download link when filter changes
-        document.getElementById('filter').addEventListener('change', updateDownloadLink);
-
-        // Update link after custom dates are applied
-        document.getElementById('applyDates').addEventListener('click', function() {
-          // The custom date modal code
-          const startDate = document.getElementById('startDate').value;
-          const endDate = document.getElementById('endDate').value;
-          if (!startDate || !endDate) {
-            alert('Please select both start and end dates.');
-            return;
-          }
-          document.getElementById('customModal').style.display = 'none';
-          updateDownloadLink();
-        });
-
-        // Also update the download link on page load
-        window.addEventListener('load', updateDownloadLink);
   </script>
 </body>
 </html>

@@ -1,57 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-    <link rel="icon" type="image/x-icon" href="tus-icon.ico">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+  <!-- Pico CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" type="image/x-icon" href="tus-icon.ico">
 
-    <style>
+  <style>
+    /* Logo positioning */
     .logo {
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        z-index: 1001;
-        transition: transform 0.3s ease;
-      }
-  
-      .logo img {
-        /* border-radius: 8px; */
-        /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
-        width: 120px;
-        height: 48px;
-      }
-      </style>
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+      transition: transform 0.3s ease;
+    }
+    .logo img {
+      width: 120px;
+      height: 48px;
+    }
 
+    /* Gauge Container */
+    .tank-demo {
+      text-align: center;
+      margin: 2rem;
+    }
+    .tank-demo svg {
+      width: 325px;
+      height: 325px;
+      display: block;
+      margin: 0 auto, -5rem auto;
+    }
+
+    /* Arc Gauge Styling (exactly as in index.html) */
+    .arc-gauge {
+      display: block;
+      margin: -2rem auto;
+      width: 325px;
+      height: 325px;
+    }
+    .arc-gauge .track {
+      fill: none;
+      stroke: #dcdcdc;
+      stroke-width: 8;
+      stroke-linecap: round;
+    }
+    .arc-gauge .progress {
+      fill: none;
+      stroke: #007bff;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 160.57;
+      stroke-dashoffset: 160.57;
+      transition: stroke-dashoffset 1s ease;
+    }
+    .arc-gauge .percentage {
+      fill: #007bff;
+      font-size: 20px;
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .arc-gauge .gauge-subtext {
+      font-size: 8px;
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    /* Very small demo note text below water level */
+    .arc-gauge .demo-note {
+      fill: #555;
+      font-size: 5px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .download-btn-container {
+      text-align: center;
+      margin: 1rem 0;
+    }
+    /* Download-style button (for the refill action) */
+    .btn-download {
+      text-decoration: none;
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 200px;
+      height: 48;
+      font-size: 1.25rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      border: 2px solid #ccc;
+      background-color: transparent;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-download:hover {
+      background-color: rgba(100, 100, 100, 0.1);
+      border-color: #ccc;
+    }
+    /* Greyed-out styling for disabled buttons */
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
+  <!-- Logo -->
+  <a href="#" class="logo">
+    <picture>
+      <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)" />
+      <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)" />
+      <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo" />
+    </picture>
+  </a>
 
-    <a href="#" class="logo">
-        <picture>
-          <source srcset="TUS-Logo-White.png" media="(prefers-color-scheme: dark)">
-          <source srcset="TUS-Logo-Black.png" media="(prefers-color-scheme: light)">
-          <img src="TUS-Logo-Black.png" alt="TUS Logo"> <!-- Fallback -->
-        </picture>
-      </a>
+  <main class="container">
+    <h1>System Settings</h1>
+    <form>
+      <h2>Timelapse Configuration</h2>
+      <div class="grid">
+        <label for="hours-to-run">
+          Hours to Run
+          <input type="number" id="hours-to-run" name="hours-to-run" placeholder="Hours">
+        </label>
+        <label for="images-per-hour">
+          Images per hour
+          <input type="number" id="images-per-hour" name="images-per-hour" placeholder="Images">
+        </label>
+      </div>
+      <a href="/logout" class="button">Logout</a>
+    </form>
+  </main>
 
-    <main class="container">
-        <h1>System Settings</h1>
-        <form>
-            <h2>Timelapse Configuration</h2>
-            <div class="grid">
-                <label for="hours-to-run">
-                    Hours to Run
-                    <input type="number" id="hours-to-run" name="hours-to-run" placeholder="Hours">
-                </label>
-                <label for="images-per-hour">
-                    Images per hour
-                    <input type="number" id="images-per-hour" name="images-per-hour" placeholder="Images">
-                </label>
-            </div>
-            
-            <a href="/logout" class="button">Logout</a>
-        </form>
-    </main>
+  <!-- Tank Fill Demo -->
+  <section class="tank-demo">
+    <h2>Tank Fill Demo</h2>
+    <!-- Water Level Gauge (exactly copied from index.html) -->
+    <svg class="arc-gauge" viewBox="0 0 100 100">
+      <path class="track" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
+      <path class="progress" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
+      <text class="percentage" x="50" y="47">0%</text>
+      <text class="gauge-subtext" x="50" y="68">Water level</text>
+      <text class="demo-note" x="50" y="80">For demonstration purposes only*</text>
+    </svg>
+
+    <!-- Refill Tank button with download-style and icon -->
+    <button id="fillTankButton" class="btn-download"><i class="fas fa-tint"></i> Refill Tank</button>
+  </section>
+
+  <script>
+    // Function to update gauge using /water_data (sets the initial percentage)
+    function updateGauge() {
+      const gaugeSVG = document.querySelector('.arc-gauge');
+      const progressPath = gaugeSVG.querySelector('.progress');
+      const percentageText = gaugeSVG.querySelector('.percentage');
+      const totalArcLength = 160.57;
+      fetch('/water_data')
+        .then(response => response.json())
+        .then(data => {
+          const sensorPercentage = parseFloat(data.water) || 0;
+          const offset = totalArcLength - (sensorPercentage / 100) * totalArcLength;
+          progressPath.style.strokeDashoffset = offset.toFixed(2);
+          percentageText.textContent = sensorPercentage.toFixed(0) + '%';
+        })
+        .catch(error => console.error('Error fetching water data:', error));
+    }
+
+    // Called when the user clicks "Refill Tank".
+    function fillTank() {
+      const button = document.getElementById("fillTankButton");
+      button.disabled = true; // disable button during filling
+
+      // Select gauge elements
+      const gaugeSVG = document.querySelector('.arc-gauge');
+      const progressPath = gaugeSVG.querySelector('.progress');
+      const percentageText = gaugeSVG.querySelector('.percentage');
+
+      // The total arc length must match stroke-dasharray
+      const totalArcLength = 160.57;
+
+      // Current gauge value (parsed from the text which was updated on page load)
+      let currentValue = parseFloat(percentageText.textContent) || 0;
+      const targetValue = 100; // fill up to 100%
+
+      // Repeatedly flash LED (via /flashLED) every 500ms while filling
+      const ledInterval = setInterval(() => {
+        fetch('/flashLED', { method: 'POST' })
+          .then(response => response.text())
+          .then(data => console.log("LED flashed:", data))
+          .catch(error => console.error("Error flashing LED:", error));
+      }, 500);
+
+      // Animate gauge fill from currentValue to targetValue
+      const fillInterval = setInterval(() => {
+        if (currentValue < targetValue) {
+          currentValue++;
+          // Recompute stroke-dashoffset
+          const offset = totalArcLength - (currentValue / 100) * totalArcLength;
+          progressPath.style.strokeDashoffset = offset.toFixed(2);
+          percentageText.textContent = currentValue.toFixed(0) + '%';
+        } else {
+          // Stop intervals and re-enable the button when done
+          clearInterval(fillInterval);
+          clearInterval(ledInterval);
+          button.disabled = false;
+        }
+      }, 50); // speed of fill (ms per increment)
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      updateGauge(); // Ensure the gauge is visible and initialized on page load
+      document.getElementById("fillTankButton").addEventListener("click", fillTank);
+    });
+  </script>
 </body>
 </html>
