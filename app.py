@@ -94,6 +94,7 @@ def get_fallback_frame():
                 cv2.IMREAD_COLOR
             )
             
+            
             # Add text overlay
             font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.putText(img, "Camera Unavailable", (120, 240), font, 1, (0, 0, 255), 2)
