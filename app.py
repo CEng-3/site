@@ -182,6 +182,20 @@ def flash_led():
         return "LED flashed", 200
     return "GPIO not available", 500
 
+@app.route('/timelapse_list')  # Note the change in route name
+def timelapse_list():
+    camera = request.args.get('camera', 'cam1')
+    if camera == 'cam1':
+        timelapse_dir = 'static/cam1'
+    elif camera == 'cam2':
+        timelapse_dir = 'static/cam2'
+    else:
+        return jsonify([])
+
+    # Ensure we only get valid MP4 files
+    video_files = [f for f in os.listdir(timelapse_dir) if f.endswith('.mp4')]
+    return jsonify(video_files)
+
 @app.route('/logout')
 def logout():
     session.pop('authenticated', None)
