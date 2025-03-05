@@ -11,12 +11,14 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='tus-icon.ico') }}" />
   <style>
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
     /* Logo styling */
     .logo {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 1001;
       transition: transform 0.3s ease;
     }
 
@@ -76,11 +78,7 @@
 
     /* Settings icon styling */
     .settings-icon {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
       font-size: 1.5rem;
-      z-index: 1000;
       transition: color 0.3s ease;
       color: var(--contrast);
     }
@@ -92,8 +90,8 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .logo img {
-        width: 40px;
-        height: 40px;
+        width: 75px;
+        height: 30px;
       }
 
       h1 {
@@ -308,7 +306,7 @@
   
 </head>
 <body>
-
+<header class="site-header">
   <!-- Logo -->
   <a href="#" class="logo">
     <picture>
@@ -321,6 +319,7 @@
   <a href="/settings" class="settings-icon" aria-label="Settings">
     <i class="fas fa-cog"></i>
   </a>
+</header>
   <main class="container">
     <h1>Aeroponic Tower Monitoring</h1>
     <!-- Tabs Navigation -->
