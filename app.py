@@ -252,15 +252,11 @@ def get_csv_data():
     
     try:
         with open('ph_hourly.csv', 'r') as csvfile:
-            reader = csv.reader(csvfile)
+            reader = csv.DictReader(csvfile)  # Use DictReader for more robust parsing
             for row in reader:
-                if not row: continue
-                rec_date = datetime.datetime.strptime(row[0], '%Y-%m-%d').date()
-                rec_time = row[1]
-                ph_value = row[2]
-                water_value = row[3]
+                rec_date = datetime.datetime.strptime(row['Date'], '%d-%m-%Y').date()
                 
-                # Filtering logic similar to previous implementations
+                # Filtering logic
                 if (filter_val == 'today' and rec_date == today) or \
                    (filter_val == 'yesterday' and rec_date == (today - datetime.timedelta(days=1))) or \
                    (filter_val == 'this_month' and rec_date.year == today.year and rec_date.month == today.month) or \
@@ -269,15 +265,18 @@ def get_csv_data():
                     datetime.datetime.strptime(end_date, '%d-%m-%Y').date()) or \
                    (filter_val not in ['today', 'yesterday', 'this_month', 'custom']):
                     data.append({
-                        'date': row[0], 
-                        'time': rec_time, 
-                        'ph': ph_value, 
-                        'water': water_value
+                        'date': row['Date'], 
+                        'time': row['Time'], 
+                        'ph': row['pH'], 
+                        'water': row['Water Level (%)']
                     })
-    except Exception as e:
-        return jsonify({"error": f"Error reading CSV file: {str(e)}"}), 500
+        
+        # Ensure we return an array
+        return jsonify(data if data else [])
     
-    return jsonify(data)
+    except Exception as e:
+        print(f"Error reading CSV file: {e}")
+        return jsonify([]), 500
 
 @app.route('/download')
 def download():
@@ -289,15 +288,12 @@ def download():
     
     try:
         with open('ph_hourly.csv', 'r') as csvfile:
-            reader = csv.reader(csvfile)
+            reader = csv.DictReader(csvfile)  # Use DictReader to handle headers
+            
             for row in reader:
-                if not row: continue
-                rec_date = datetime.datetime.strptime(row[0], '%Y-%m-%d').date()
-                rec_time = row[1]
-                ph_value = row[2]
-                water_value = row[3]
+                rec_date = datetime.datetime.strptime(row['Date'], '%d-%m-%Y').date()
                 
-                # Filtering logic similar to get_csv_data
+                # Filtering logic
                 if (filter_val == 'today' and rec_date == today) or \
                    (filter_val == 'yesterday' and rec_date == (today - datetime.timedelta(days=1))) or \
                    (filter_val == 'this_month' and rec_date.year == today.year and rec_date.month == today.month) or \
@@ -306,29 +302,40 @@ def download():
                     datetime.datetime.strptime(end_date, '%d-%m-%Y').date()) or \
                    (filter_val not in ['today', 'yesterday', 'this_month', 'custom']):
                     data.append({
-                        'date': row[0], 
-                        'time': rec_time, 
-                        'ph': ph_value, 
-                        'water': water_value
+                        'date': row['Date'], 
+                        'time': row['Time'], 
+                        'ph': row['pH'], 
+                        'water': row['Water Level (%)']
                     })
+    
+        # Generate downloadable CSV
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write headers
+        writer.writerow(["Date", "Time", "pH", "Water Level (%)"])
+        
+        # Write data rows
+        for row in data:
+            writer.writerow([
+                row["date"], 
+                row["time"], 
+                row["ph"], 
+                row["water"]
+            ])
+        
+        csv_content = output.getvalue()
+        output.close()
+        
+        return Response(
+            csv_content, 
+            mimetype="text/csv", 
+            headers={"Content-Disposition": "attachment; filename=filtered_data.csv"}
+        )
+    
     except Exception as e:
+        print(f"Download error: {e}")
         return jsonify({"error": f"Error reading CSV file: {str(e)}"}), 500
-    
-    # Generate downloadable CSV
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(["Date", "Time", "pH", "Water Level (%)"])
-    for row in data:
-        writer.writerow([row["date"], row["time"], row["ph"], row["water"]])
-    
-    csv_content = output.getvalue()
-    output.close()
-    
-    return Response(
-        csv_content, 
-        mimetype="text/csv", 
-        headers={"Content-Disposition": "attachment; filename=filtered_data.csv"}
-    )
 
 # Main Execution
 if __name__ == '__main__':
