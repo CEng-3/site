@@ -7,9 +7,13 @@
     <link rel="icon" type="image/x-icon" href="tus-icon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
+        .site-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px;
+        }
         .logo {
-            top: 1rem;
-            left: 1rem;
             transition: transform 0.3s ease;
         }
         
@@ -18,9 +22,6 @@
         }
 
         .close-button {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
             font-size: 1.5rem;
             cursor: pointer;
             transition: color 0.3s ease;
@@ -39,18 +40,20 @@
         
 </head>
 <body>
-    <a href="#" class="logo">
-        <picture>
-            <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)" />
-            <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)" />
-            <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo" />
-        </picture>
-    </a>
-    
-    <!-- X button with JavaScript to go back to previous page -->
-    <a href="javascript:history.back()" class="close-button" aria-label="Close">
-        <i class="fas fa-times"></i>
-    </a>
+    <header class="site-header">
+        <a href="#" class="logo">
+            <picture>
+                <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)" />
+                <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)" />
+                <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo" />
+            </picture>
+        </a>
+        
+        <!-- X button with JavaScript to go back to previous page -->
+        <a href="javascript:history.back()" class="close-button" aria-label="Close">
+            <i class="fas fa-times"></i>
+        </a>
+    </header>
     
     <main class="container">
         <h1>Settings Login</h1>

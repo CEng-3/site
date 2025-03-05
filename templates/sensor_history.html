@@ -37,12 +37,11 @@
   />
   
   <style>
-    /* TUS Logo styling */
-    .logo {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 1001;
+    .site-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px 20px 20px;
     }
     .logo img {
       width: 120px;
@@ -51,11 +50,7 @@
 
     /* Page-level Close (X) button */
     .close-button {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
       font-size: 1.5rem;
-      z-index: 1001;
       cursor: pointer;
       transition: color 0.3s ease;
     }
@@ -361,32 +356,35 @@
     }
   </style>
 
-  <!-- Chart.js library for graphs -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart.js library for graphs -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  
+  <header class="site-header">
   <!-- Logo -->
   <a href="#" class="logo">
-    <picture>
-      <source
-        srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}"
-        media="(prefers-color-scheme: dark)"
-      />
-      <source
-        srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
-        media="(prefers-color-scheme: light)"
-      />
-      <img
-        src="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
-        alt="TUS Logo"
-      />
-    </picture>
-  </a>
+      <picture>
+        <source
+          srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}"
+          media="(prefers-color-scheme: dark)"
+        />
+        <source
+          srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
+          media="(prefers-color-scheme: light)"
+        />
+        <img
+          src="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
+          alt="TUS Logo"
+        />
+      </picture>
+    </a>
 
-  <!-- X button -->
-  <a href="/" class="close-button" aria-label="Close">
-    <i class="fas fa-times"></i>
-  </a>
+    <!-- X button -->
+    <a href="/" class="close-button" aria-label="Close">
+      <i class="fas fa-times"></i>
+    </a>
+  </header>
   
   <!-- Header -->
   <header>
