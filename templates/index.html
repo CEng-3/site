@@ -201,6 +201,65 @@
         fill: #fff;
       }
     }
+
+    /* New Camera Selector Styles */
+    .camera-selector {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+    .camera-btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid #ccc;
+      background-color: transparent;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .camera-btn.active {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+
+    /* Timelapse Grid Styles */
+    .timelapse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: rgba(0,0,0,0.05);
+      border-radius: 0.5rem;
+    }
+    .timelapse-thumbnail {
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border-radius: 0.25rem;
+      overflow: hidden;
+    }
+    .timelapse-thumbnail:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .timelapse-thumbnail img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+    }
+    .timelapse-thumbnail p {
+      margin: 0.5rem 0;
+      font-size: 0.875rem;
+      text-align: center;
+    }
+    .date-group {
+      grid-column: 1 / -1;
+      font-weight: bold;
+      margin-top: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
@@ -265,9 +324,19 @@
     <!-- Timelapse Tab -->
     <div id="timelapse" class="tab-content">
       <h2>Timelapse Recordings</h2>
+      
+      <!-- Camera Selection Buttons -->
+      <div class="camera-selector">
+        <button class="camera-btn active" data-camera="cam1">Camera 1</button>
+        <button class="camera-btn" data-camera="cam2">Camera 2</button>
+      </div>
+
       <video id="timelapse-video" width="640" height="480" controls autoplay>
         Your browser does not support the video tag.
       </video>
+      <div id="timelapse-grid" class="timelapse-grid">
+        <!-- Timelapse videos will be dynamically populated here -->
+      </div>
     </div>
   </main>
   <script>
@@ -358,7 +427,6 @@
       setInterval(updateWaterLevel, 5000);
       updateWaterLevel();
       
-
       // Update Notification Bar based on live values
       function updateNotificationBar() {
         const waterValue = parseFloat(waterLabel.textContent);
@@ -381,6 +449,104 @@
         }
       }
       
+      // Function to group videos by date
+      function groupVideosByDate(videos) {
+        const groupedVideos = {};
+        videos.forEach(video => {
+          const dateMatch = video.match(/timelapse_(\d{4}-\d{2}-\d{2})/);
+          if (dateMatch) {
+            const date = dateMatch[1];
+            if (!groupedVideos[date]) {
+              groupedVideos[date] = [];
+            }
+            groupedVideos[date].push(video);
+          }
+        });
+        return groupedVideos;
+      }
+
+      // Function to load and display timelapse videos
+      async function loadTimelapseVideos(camera = 'cam1') {
+        try {
+          const response = await fetch(`/timelapse_list?camera=${camera}`);
+          const videos = await response.json();
+          const videoGrid = document.getElementById('timelapse-grid');
+          videoGrid.innerHTML = ''; // Clear existing content
+
+          const groupedVideos = groupVideosByDate(videos);
+          
+          // Sort dates in descending order
+          const sortedDates = Object.keys(groupedVideos).sort((a, b) => new Date(b) - new Date(a));
+
+          sortedDates.forEach(date => {
+            // Add date group header
+            const dateHeader = document.createElement('div');
+            dateHeader.classList.add('date-group');
+            dateHeader.textContent = date;
+            videoGrid.appendChild(dateHeader);
+
+            // Add videos for this date
+            groupedVideos[date].forEach(videoName => {
+              const thumbnailContainer = document.createElement('div');
+              thumbnailContainer.classList.add('timelapse-thumbnail');
+              
+              const img = document.createElement('img');
+              img.src = `/static/${camera}/${videoName.replace('.mp4', '.jpg')}`;
+              img.alt = `Timelapse ${videoName}`;
+              
+              const videoLabel = document.createElement('p');
+              videoLabel.textContent = videoName;
+              
+              thumbnailContainer.appendChild(img);
+              thumbnailContainer.appendChild(videoLabel);
+              
+              thumbnailContainer.addEventListener('click', () => {
+                const video = document.getElementById('timelapse-video');
+                const videoPath = `/static/${camera}/${videoName}`;
+                const timestamp = new Date().getTime(); // cache busting
+                video.innerHTML = `<source src="${videoPath}?t=${timestamp}" type="video/mp4">Your browser does not support the video tag.`;
+                video.load();
+              });
+              
+              videoGrid.appendChild(thumbnailContainer);
+            });
+          });
+        } catch (error) {
+          console.error('Error loading timelapse videos:', error);
+        }
+      }
+
+      // Camera selection event listeners
+      document.querySelectorAll('.camera-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Remove active class from all buttons
+          document.querySelectorAll('.camera-btn').forEach(b => b.classList.remove('active'));
+          
+          // Add active class to clicked button
+          btn.classList.add('active');
+          
+          // Load videos for selected camera
+          const camera = btn.dataset.camera;
+          loadTimelapseVideos(camera);
+        });
+      });
+
+      // Modify existing tab click handler to load timelapse videos
+      document.querySelectorAll('.tabs a').forEach((tab) => {
+        tab.addEventListener('click', (e) => {
+          // If Timelapse tab is activated, load videos
+          if (tab.getAttribute('href') === "#timelapse") {
+            // Load videos for currently active camera
+            const activeCamera = document.querySelector('.camera-btn.active').dataset.camera;
+            loadTimelapseVideos(activeCamera);
+          }
+        });
+      });
+
+      // Optional: Load videos when page loads if timelapse tab is active
+      if (document.querySelector('.tabs a[href="#timelapse"]').classList.contains('active')) {
+        loadTimelapseVideos();
+      }
     });
   </script>
 </body>
