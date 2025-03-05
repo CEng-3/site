@@ -2,43 +2,8 @@
 <html lang="en">
 
 <head>
-<<<<<<< Updated upstream
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-    <link rel="icon" type="image/x-icon" href="tus-icon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        .logo {
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 1001;
-            transition: transform 0.3s ease;
-        }
-        
-        .close-button {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            font-size: 1.5rem;
-            z-index: 1001;
-            cursor: pointer;
-            transition: color 0.3s ease;
-            text-decoration: none;
-        }
-        
-        .close-button:hover i {
-            color: red !important;
-        }
-        
-        .logo img {
-            width: 120px;
-            height: 48px;
-        }
-    </style>
-=======
+
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aeroponic Tower Monitoring</title>
@@ -340,38 +305,10 @@
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
   </style>
->>>>>>> Stashed changes
+  
 </head>
-
 <body>
-<<<<<<< Updated upstream
-    <a href="#" class="logo">
-        <picture>
-            <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)" />
-            <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)" />
-            <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo" />
-        </picture>
-    </a>
-    
-    <!-- X button with JavaScript to go back to previous page -->
-    <a href="javascript:history.back()" class="close-button" aria-label="Close">
-        <i class="fas fa-times"></i>
-    </a>
-    
-    <main class="container">
-        <h1>Settings Login</h1>
-        {% if error %}
-            <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
-        <form method="POST" action="/settings">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-            <button type="submit" class="primary">Login</button>
-        </form>
-    </main>
-</body>
-</html>
-=======
+
   <!-- Logo -->
   <a href="#" class="logo">
     <picture>
@@ -665,4 +602,3 @@
 </body>
 
 </html>
->>>>>>> Stashed changes
