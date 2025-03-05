@@ -1,70 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-    <link rel="icon" type="image/x-icon" href="tus-icon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        .site-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 20px;
-        }
-        .logo {
-            transition: transform 0.3s ease;
-        }
-        
-        body {
-            position: relative; /* This will serve as a reference for the absolute positioning of the close button */
-        }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
 
-        .close-button {
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: color 0.3s ease;
-            text-decoration: none;
-        }
+  <!-- Pico.css -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="tus-icon.ico">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
-        .close-button:hover i {
-            color: red !important;
-}
-        
-        .logo img {
-            width: 120px;
-            height: 48px;
-        }
-    </style>
-        
+  <style>
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+    .header-underline {
+        width: 275px; /* adjust width as needed */
+        margin: -2.8rem 0 5rem 0;
+        border-bottom: 1px solid #dee2e6;
+      }
+    .logo img {
+      width: 120px;
+      height: 48px;
+    }
+    .close-button {
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+      text-decoration: none;
+    }
+    .close-button:hover i {
+      color: red !important;
+    }
+
+    /* Dark theme overrides (background color left to system) */
+    @media (prefers-color-scheme: dark) {
+      input, a {
+        color: #e0e0e0;
+        border: 1px solid #444;
+      }
+      /* Remove borders and outlines for logo and close button in dark mode */
+      .logo, .close-button {
+        border: none !important;
+        outline: none !important;
+      }
+      .close-button i {
+        color: #fff;
+      }
+      .alert-popup {
+        background-color: #b00020;
+        color: #fff;
+        border-color: #b00020;
+      }
+    }
+
+    /* Base styling matching Sensor History's "Download" button */
+    .btn-history {
+      text-decoration: none;
+      color: inherit; /* Overridden below */
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.25rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      border: 2px solid #ccc;
+      background-color: transparent;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+    }
+    /* Override bottom margin so it’s closer to the input */
+    .btn-download {
+      margin-bottom: 0 !important;
+    }
+    /* Blue highlight and text/icon color */
+    .btn-login {
+      border-color: #2196F3;
+      color: #2196F3 !important; /* make icon & text blue */
+      float: right;  /* Moves the button to the right */
+    }
+    .btn-login:hover {
+      background-color: rgba(33, 150, 243, 0.1);
+      border-color: #2196F3;
+    }
+    /* A small gap above the button so it's on its own line */
+    .login-button-gap {
+      margin-top: 0.5rem;
+    }
+
+    /* Styles for the incorrect password popup */
+    .alert-popup {
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 1.5rem 2rem;
+      background-color: #f44336;
+      color: #fff;
+      border: 2px solid #f44336;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+      animation: slideDown 0.5s ease-out;
+    }
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -20%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+    .close-alert {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+  </style>
 </head>
 <body>
-    <header class="site-header">
-        <a href="#" class="logo">
-            <picture>
-                <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)" />
-                <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)" />
-                <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo" />
-            </picture>
-        </a>
-        
-        <!-- X button with JavaScript to go back to previous page -->
-        <a href="javascript:history.back()" class="close-button" aria-label="Close">
-            <i class="fas fa-times"></i>
-        </a>
-    </header>
-    
-    <main class="container">
-        <h1>Settings Login</h1>
-        {% if error %}
-            <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
-        <form method="POST" action="/settings">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-            <button type="submit" class="primary">Login</button>
-        </form>
-    </main>
+  <header class="site-header">
+    <a href="#" class="logo">
+      <picture>
+        <source
+          srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}"
+          media="(prefers-color-scheme: dark)"
+        />
+        <source
+          srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
+          media="(prefers-color-scheme: light)"
+        />
+        <img
+          src="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
+          alt="TUS Logo"
+        />
+      </picture>
+    </a>
+    <!-- Close button -->
+    <a href="javascript:history.back()" class="close-button" aria-label="Close">
+      <i class="fas fa-times"></i>
+    </a>
+  </header>
+
+  <main class="container">
+    <h1>Settings Login</h1>
+    <div class="header-underline"></div>
+    <!-- Incorrect password popup -->
+    {% if error %}
+      <div class="alert-popup" id="errorPopup">
+        <span class="close-alert" onclick="document.getElementById('errorPopup').style.display='none';">&times;</span>
+        {{ error }}
+      </div>
+    {% endif %}
+
+    <!-- Form for login -->
+    <form id="loginForm" method="POST" action="/settings">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        required
+      />
+
+      <!-- Button (anchor) that triggers the form submission -->
+      <a
+        href="#"
+        class="btn-history btn-download btn-login login-button-gap"
+        onclick="document.getElementById('loginForm').submit();"
+      >
+        <i class="fas fa-sign-in-alt"></i>
+        Login
+      </a>
+    </form>
+  </main>
 </body>
 </html>
