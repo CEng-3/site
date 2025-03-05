@@ -1,553 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Aeroponic Tower Monitoring</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='tus-icon.ico') }}" />
-  <style>
-    /* Logo styling */
-    .logo {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 1001;
-      transition: transform 0.3s ease;
-    }
-    .logo img {
-      width: 120px;
-      height: 48px;
-    }
-    /* Tabs */
-    .tabs {
-      margin: 2rem 0;
-    }
-    .tabs nav {
-      border-bottom: 1px solid #dee2e6;
-    }
-    .tabs ul {
-      display: flex;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-    .tabs li {
-      margin-right: 1rem;
-    }
-    .tabs a {
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem 0.25rem 0 0;
-      transition: all 0.2s;
-    }
-    .tabs a.active,
-    .tabs a:hover {
-      background: #f8f9fa;
-      border-bottom: 2px solid #007bff;
-    }
-    .tab-content {
-      display: none;
-      padding: 1rem 0;
-      text-align: center;
-    }
-    .tab-content.active {
-      display: block;
-    }
-    /* Camera feed grid */
-    .camera-grid {
-      display: flex;
-      justify-content: center;
-    }
-    /* Settings icon styling */
-    .settings-icon {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      font-size: 1.5rem;
-      z-index: 1000;
-      transition: color 0.3s ease;
-      color: var(--contrast);
-    }
-    .settings-icon:hover {
-      color: var(--primary);
-    }
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .logo img {
-        width: 40px;
-        height: 40px;
-      }
-      h1 {
-        font-size: 1.5rem;
-        margin-top: 2.5rem;
-      }
-    }
-    /* Tab text color adjustments */
-    @media (prefers-color-scheme: light) {
-      .tabs a {
-        color: #000;
-      }
-      .tabs a.active,
-      .tabs a:hover {
-        background: #f8f9fa;
-        color: #000;
-        border-bottom: 2px solid #007bff;
-      }
-      h1 {
-        color: #000;
-      }
-      .tab-content h2,
-      .tab-content p {
-        color: #000;
-      }
-    }
-    @media (prefers-color-scheme: dark) {
-      .tabs a {
-        color: #fff;
-      }
-      .tabs a.active,
-      .tabs a:hover {
-        background: #555;
-        color: #fff;
-        border-bottom: 2px solid #007bff;
-      }
-    }
-      
-    .notification-bar {
-        background-color: #ffc107; /* Yellow background for warning */
-        color: #000;              /* Dark text */
-        padding: 0.75rem;
-        text-align: center;
-        margin-top: -2rem;
-        margin-bottom: 3rem;
-        border-radius: 0.25rem;
-        font-weight: bold;
-      }
-      .notification-bar i {
-          margin-right: 0.5rem;
-      }
-      
-    /* 230° Arc Gauge Styling */
-    .arc-gauge {
-      display: block;
-      margin: -2rem auto;
-      width: 325px;
-      height: 325px;
-    }
-    .arc-gauge .track {
-      fill: none;
-      stroke-width: 10;
-      stroke-linecap: round;
-    }
-    .arc-gauge .progress {
-      fill: none;
-      stroke: #007bff;
-      stroke-width: 10;
-      stroke-linecap: round;
-      stroke-dasharray: 160.57;
-      stroke-dashoffset: 160.57;
-      transition: stroke-dashoffset 1s ease;
-    }
-    .arc-gauge .percentage {
-      fill: #007bff;
-      font-size: 20px;
-      font-weight: 600;
-      text-anchor: middle;
-      dominant-baseline: middle;
-    }
-    .arc-gauge .gauge-subtext {
-      font-size: 8px;
-      font-weight: 600;
-      text-anchor: middle;
-      dominant-baseline: middle;
-    }
-    .history-btn-container {
-      text-align: center;
-      margin: 1rem 0;
-    }
-    .btn-history {
-      text-decoration: none;
-      color: inherit;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 1.25rem;
-      padding: 0.75rem 1.5rem;
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem;
-      border: 2px solid #ccc;
-      background-color: transparent;
-      transition: background-color 0.2s ease, border-color 0.2s ease;
-    }
-    .btn-history:hover {
-      background-color: rgba(100, 100, 100, 0.1);
-      border-color: #ccc;
-    }
-    @media (prefers-color-scheme: light) {
-      .arc-gauge .track {
-        stroke: #ccc;
-      }
-      .arc-gauge .arc-subtext {
-        fill: #000;
-      }
-    }
-    @media (prefers-color-scheme: dark) {
-      .arc-gauge .track {
-        stroke: #444;
-      }
-      .arc-gauge .gauge-subtext {
-        fill: #fff;
-      }
-    }
-
-    /* New Camera Selector Styles */
-    .camera-selector {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1rem;
-      gap: 1rem;
-    }
-    .camera-btn {
-      padding: 0.5rem 1rem;
-      border: 2px solid #ccc;
-      background-color: transparent;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .camera-btn.active {
-      background-color: #007bff;
-      color: white;
-      border-color: #007bff;
-    }
-
-    /* Timelapse Grid Styles */
-    .timelapse-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-      padding: 1rem;
-      background-color: rgba(0,0,0,0.05);
-      border-radius: 0.5rem;
-    }
-    .timelapse-thumbnail {
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      border-radius: 0.25rem;
-      overflow: hidden;
-    }
-    .timelapse-thumbnail:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .timelapse-thumbnail img {
-      width: 100%;
-      height: 100px;
-      object-fit: cover;
-    }
-    .timelapse-thumbnail p {
-      margin: 0.5rem 0;
-      font-size: 0.875rem;
-      text-align: center;
-    }
-    .date-group {
-      grid-column: 1 / -1;
-      font-weight: bold;
-      margin-top: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <link rel="icon" type="image/x-icon" href="tus-icon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .logo {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            transition: transform 0.3s ease;
+        }
+        
+        .close-button {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            z-index: 1001;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .close-button:hover i {
+            color: red !important;
+        }
+        
+        .logo img {
+            width: 120px;
+            height: 48px;
+        }
+    </style>
 </head>
 <body>
-  <!-- Logo -->
-  <a href="#" class="logo">
-    <picture>
-      <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)" />
-      <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)" />
-      <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo" />
-    </picture>
-  </a>
-  <!-- Settings Icon -->
-  <a href="/settings" class="settings-icon" aria-label="Settings">
-    <i class="fas fa-cog"></i>
-  </a>
-  <main class="container">
-    <h1>Aeroponic Tower Monitoring</h1>
-    <!-- Tabs Navigation -->
-    <div class="tabs">
-      <nav>
-        <ul>
-          <li><a href="#sensors" class="active">Sensors</a></li>
-          <li><a href="#live-feed">Live Feed</a></li>
-          <li><a href="#timelapse">Timelapse</a></li>
-        </ul>
-      </nav>
-    </div>
-    <!-- Sensors Tab -->
-    <div id="sensors" class="tab-content active">
-        <!-- Notification Bar (initially hidden) -->
-        <div id="notification-bar" class="notification-bar"><i class="fas fa-exclamation-triangle"></i>Preview: Notification bar active</div>
-        
-      <!-- 230° Arc Gauge (SVG) -->
-      <svg class="arc-gauge" viewBox="0 0 100 100">
-        <path class="track" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
-        <path class="progress" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
-        <text class="percentage" x="50" y="47">0%</text>
-        <text class="gauge-subtext" x="50" y="68">Water level</text>
-      </svg>
-      <!-- pH Gauge  -->
-      <svg class="arc-gauge arc-gauge-ph" viewBox="0 0 100 100">
-        <path class="track" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
-        <path class="progress" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
-        <text class="percentage" x="50" y="47">7.0</text>
-        <text class="gauge-subtext" x="50" y="68">pH level</text>
-      </svg>
-      <div class="history-btn-container">
-        <a href="/sensor_history" class="btn-history">
-          <i class="fas fa-history"></i> View History
-        </a>
-      </div>
-    </div>
-    <!-- Live Feed Tab -->
-    <div id="live-feed" class="tab-content">
-      <h2>Live Camera Feed</h2>
-      <div class="camera-grid">
-        <div class="camera-feed">
-          <img src="{{ url_for('video_feed') }}" width="640" height="480" />
-        </div>
-      </div>
-    </div>
-    <!-- Timelapse Tab -->
-    <div id="timelapse" class="tab-content">
-      <h2>Timelapse Recordings</h2>
-      
-      <!-- Camera Selection Buttons -->
-      <div class="camera-selector">
-        <button class="camera-btn active" data-camera="cam1">Camera 1</button>
-        <button class="camera-btn" data-camera="cam2">Camera 2</button>
-      </div>
-
-      <video id="timelapse-video" width="640" height="480" controls autoplay>
-        Your browser does not support the video tag.
-      </video>
-      <div id="timelapse-grid" class="timelapse-grid">
-        <!-- Timelapse videos will be dynamically populated here -->
-      </div>
-    </div>
-  </main>
-  <script>
-    // Simple tab switching with dynamic timelapse video loading
-    document.querySelectorAll('.tabs a').forEach((tab) => {
-      tab.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.querySelectorAll('.tabs a, .tab-content')
-          .forEach(element => element.classList.remove('active'));
-        tab.classList.add('active');
-        const tabContent = document.querySelector(tab.getAttribute('href'));
-        tabContent.classList.add('active');
-        // If Timelapse tab is activated, update video source dynamically
-        if (tab.getAttribute('href') === "#timelapse") {
-          const video = document.getElementById('timelapse-video');
-          const today = new Date();
-          const year = today.getFullYear();
-          const month = (today.getMonth() + 1).toString().padStart(2, '0');
-          const day = today.getDate().toString().padStart(2, '0');
-          const dateStr = `${year}-${month}-${day}`;
-          const videoPath = `/static/timelapse_${dateStr}/timelapse_${dateStr}.mp4`;
-          const timestamp = new Date().getTime(); // cache busting
-          video.innerHTML = `<source src="${videoPath}?t=${timestamp}" type="video/mp4">Your browser does not support the video tag.`;
-          video.load();
-        }
-      });
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const totalArcLength = 160.57; // common arc length for both gauges
-      const lowWaterThreshold = 30;  // example threshold
-      const minPH = 6.0, maxPH = 7.0;  // acceptable pH range
-
-      // --- Water Level Gauge Elements ---
-      const waterGauge = document.querySelector('.arc-gauge:not(.arc-gauge-ph)');
-      const waterProgressPath = waterGauge.querySelector('.progress');
-      const waterLabel = waterGauge.querySelector('.percentage');
-
-      // --- pH Gauge Elements ---
-      const phGauge = document.querySelector('.arc-gauge-ph');
-      const phProgressPath = phGauge.querySelector('.progress');
-      const phLabel = phGauge.querySelector('.percentage');
-
-      // Function to get a color based on pH value
-      function getPHColor(ph) {
-        if (ph < 4) return "#FF0000";
-        else if (ph < 7) return "#FFA500";
-        else if (Math.abs(ph - 7) < 0.1) return "#00FF00";
-        else if (ph < 10) return "#0000FF";
-        else return "#800080";
-      }
-      
-      setInterval(updateNotificationBar, 5000);
-      updateNotificationBar();
-
-      // Update pH gauge by fetching /ph_data every 5 seconds
-      async function updatePH() {
-        try {
-          const response = await fetch('/ph_data');
-          const data = await response.json();
-          const phValue = data.ph;
-          const phOffset = totalArcLength - (phValue / 14) * totalArcLength;
-          phProgressPath.style.strokeDashoffset = phOffset.toFixed(2);
-          phLabel.textContent = phValue.toFixed(1);
-          const phColor = getPHColor(phValue);
-          phProgressPath.style.stroke = phColor;
-          phLabel.style.fill = phColor;
-        } catch (error) {
-          console.error('Error fetching pH data:', error);
-        }
-      }
-      setInterval(updatePH, 5000);
-      updatePH();
-
-      // Update water gauge by fetching /water_data every 5 seconds
-      async function updateWaterLevel() {
-        try {
-          const response = await fetch('/water_data');
-          const data = await response.json();
-          const sensorPercentage = parseFloat(data.water);
-          const waterOffset = totalArcLength - (sensorPercentage / 100) * totalArcLength;
-          waterProgressPath.style.strokeDashoffset = waterOffset.toFixed(2);
-          waterLabel.textContent = sensorPercentage.toFixed(1) + '%';
-        } catch (error) {
-          console.error('Error fetching water data:', error);
-        }
-      }
-      setInterval(updateWaterLevel, 5000);
-      updateWaterLevel();
-      
-      // Update Notification Bar based on live values
-      function updateNotificationBar() {
-        const waterValue = parseFloat(waterLabel.textContent);
-        const pHValue = parseFloat(phLabel.textContent);
-        const notificationBar = document.getElementById('notification-bar');
-        
-        if (waterValue < lowWaterThreshold || pHValue < minPH || pHValue > maxPH) {
-          notificationBar.style.display = 'block';
-          let message = '';
-          if (waterValue < lowWaterThreshold && (pHValue < minPH || pHValue > maxPH)) {
-            message = 'Warning: Low water level and pH out of range!';
-          } else if (waterValue < lowWaterThreshold) {
-            message = 'Warning: Low water level!';
-          } else {
-            message = 'Warning: pH out of range!';
-          }
-          notificationBar.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
-        } else {
-          notificationBar.style.display = 'none';
-        }
-      }
-      
-      // Function to group videos by date
-      function groupVideosByDate(videos) {
-        const groupedVideos = {};
-        videos.forEach(video => {
-          const dateMatch = video.match(/timelapse_(\d{4}-\d{2}-\d{2})/);
-          if (dateMatch) {
-            const date = dateMatch[1];
-            if (!groupedVideos[date]) {
-              groupedVideos[date] = [];
-            }
-            groupedVideos[date].push(video);
-          }
-        });
-        return groupedVideos;
-      }
-
-      // Function to load and display timelapse videos
-      async function loadTimelapseVideos(camera = 'cam1') {
-        try {
-          const response = await fetch(`/timelapse_list?camera=${camera}`);
-          const videos = await response.json();
-          const videoGrid = document.getElementById('timelapse-grid');
-          videoGrid.innerHTML = ''; // Clear existing content
-
-          const groupedVideos = groupVideosByDate(videos);
-          
-          // Sort dates in descending order
-          const sortedDates = Object.keys(groupedVideos).sort((a, b) => new Date(b) - new Date(a));
-
-          sortedDates.forEach(date => {
-            // Add date group header
-            const dateHeader = document.createElement('div');
-            dateHeader.classList.add('date-group');
-            dateHeader.textContent = date;
-            videoGrid.appendChild(dateHeader);
-
-            // Add videos for this date
-            groupedVideos[date].forEach(videoName => {
-              const thumbnailContainer = document.createElement('div');
-              thumbnailContainer.classList.add('timelapse-thumbnail');
-              
-              const img = document.createElement('img');
-              img.src = `/static/${camera}/${videoName.replace('.mp4', '.jpg')}`;
-              img.alt = `Timelapse ${videoName}`;
-              
-              const videoLabel = document.createElement('p');
-              videoLabel.textContent = videoName;
-              
-              thumbnailContainer.appendChild(img);
-              thumbnailContainer.appendChild(videoLabel);
-              
-              thumbnailContainer.addEventListener('click', () => {
-                const video = document.getElementById('timelapse-video');
-                const videoPath = `/static/${camera}/${videoName}`;
-                const timestamp = new Date().getTime(); // cache busting
-                video.innerHTML = `<source src="${videoPath}?t=${timestamp}" type="video/mp4">Your browser does not support the video tag.`;
-                video.load();
-              });
-              
-              videoGrid.appendChild(thumbnailContainer);
-            });
-          });
-        } catch (error) {
-          console.error('Error loading timelapse videos:', error);
-        }
-      }
-
-      // Camera selection event listeners
-      document.querySelectorAll('.camera-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          // Remove active class from all buttons
-          document.querySelectorAll('.camera-btn').forEach(b => b.classList.remove('active'));
-          
-          // Add active class to clicked button
-          btn.classList.add('active');
-          
-          // Load videos for selected camera
-          const camera = btn.dataset.camera;
-          loadTimelapseVideos(camera);
-        });
-      });
-
-      // Modify existing tab click handler to load timelapse videos
-      document.querySelectorAll('.tabs a').forEach((tab) => {
-        tab.addEventListener('click', (e) => {
-          // If Timelapse tab is activated, load videos
-          if (tab.getAttribute('href') === "#timelapse") {
-            // Load videos for currently active camera
-            const activeCamera = document.querySelector('.camera-btn.active').dataset.camera;
-            loadTimelapseVideos(activeCamera);
-          }
-        });
-      });
-
-      // Optional: Load videos when page loads if timelapse tab is active
-      if (document.querySelector('.tabs a[href="#timelapse"]').classList.contains('active')) {
-        loadTimelapseVideos();
-      }
-    });
-  </script>
+    <a href="#" class="logo">
+        <picture>
+            <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)" />
+            <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)" />
+            <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo" />
+        </picture>
+    </a>
+    
+    <!-- X button with JavaScript to go back to previous page -->
+    <a href="javascript:history.back()" class="close-button" aria-label="Close">
+        <i class="fas fa-times"></i>
+    </a>
+    
+    <main class="container">
+        <h1>Settings Login</h1>
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        <form method="POST" action="/settings">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit" class="primary">Login</button>
+        </form>
+    </main>
 </body>
 </html>
