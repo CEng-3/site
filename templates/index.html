@@ -356,11 +356,17 @@
     <!-- Live Feed Tab -->
     <div id="live-feed" class="tab-content">
       <h2>Live Camera Feed</h2>
-      <div class="camera-grid">
-        <div class="camera-feed">
-          <img src="{{ url_for('video_feed') }}" width="640" height="480" />
-        </div>
-      </div>
+<div class="camera-grid">
+  <div class="camera-feed">
+    <h3>Pi A Camera</h3>
+    <img src="{{ url_for('video_feed') }}" width="640" height="480" />
+  </div>
+  <div class="camera-feed">
+    <h3>Pi B Camera</h3>
+    <img src="{{ url_for('video_feed_pi_b') }}" width="640" height="480" onerror="this.onerror=null; this.src='/static/camera_fallback.jpg';" />
+  </div>
+</div>
+
     </div>
     <!-- Timelapse Tab -->
     <div id="timelapse" class="tab-content">
