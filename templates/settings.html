@@ -1,16 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Settings</title>
   <!-- Pico CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="icon" type="image/x-icon" href="tus-icon.ico">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link rel="icon" type="image/x-icon" href="tus-icon.ico" />
 
   <style>
+    /* Header styling for title and underline */
+    header {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .header-title {
+      margin: 0;
+      font-size: 2rem;
+    }
+    .header-underline {
+      width: 80%;
+      max-width: 500px;
+      margin: 0.25rem auto 5rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
     /* Logo positioning */
     .logo {
       position: fixed;
@@ -24,6 +40,31 @@
       height: 48px;
     }
 
+    /* Login button styling with icon and red text */
+    .login-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1001;
+      text-decoration: none;
+      color: red;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 200px;
+      height: 48px;
+      font-size: 1.25rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      border: 2px solid red;
+      background-color: transparent;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .login-btn:hover {
+      background-color: rgba(255, 0, 0, 0.1);
+      border-color: red;
+    }
+
     /* Gauge Container */
     .tank-demo {
       text-align: center;
@@ -33,10 +74,10 @@
       width: 325px;
       height: 325px;
       display: block;
-      margin: 0 auto, -5rem auto;
+      margin: 0 auto;
     }
 
-    /* Arc Gauge Styling (exactly as in index.html) */
+    /* Arc Gauge Styling */
     .arc-gauge {
       display: block;
       margin: -2rem auto;
@@ -71,18 +112,14 @@
       text-anchor: middle;
       dominant-baseline: middle;
     }
-    /* Very small demo note text below water level */
     .arc-gauge .demo-note {
       fill: #555;
       font-size: 5px;
       text-anchor: middle;
       dominant-baseline: middle;
     }
-    .download-btn-container {
-      text-align: center;
-      margin: 1rem 0;
-    }
-    /* Download-style button (for the refill action) */
+
+    /* Download-style button */
     .btn-download {
       text-decoration: none;
       color: inherit;
@@ -90,7 +127,7 @@
       align-items: center;
       gap: 0.5rem;
       width: 200px;
-      height: 48;
+      height: 48px;
       font-size: 1.25rem;
       padding: 0.5rem 1rem;
       border-radius: 0.25rem;
@@ -107,6 +144,133 @@
       background-color: #ccc;
       cursor: not-allowed;
     }
+
+    /* Sensor Configuration Styling */
+    .sensor-config {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .sensor-config .input-icon-container {
+      position: relative;
+      flex: 1;
+    }
+    .sensor-config .input-icon-container input {
+      width: 100%;
+      height: 2.5rem;
+      line-height: 1.2;
+      padding-left: 2.2rem; /* space for the icon */
+      box-sizing: border-box;
+    }
+    .sensor-config .input-icon-container .icon {
+      position: absolute;
+      left: 0.6rem;
+      top: 38%;
+      transform: translateY(-50%);
+      color: #007bff;
+      font-size: 1rem;
+      line-height: 1;
+    }
+    .sensor-config button {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 0.25rem;
+      font-size: 1.25rem;
+      width: 60px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sensor-config button:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Water level threshold title and description */
+    .water-threshold-config label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .water-threshold-config p {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0.25rem 0 1rem;
+    }
+    .water-threshold-config + .sensor-config button {
+      width: 225px;
+    }
+
+    /* pH threshold section styling */
+    .ph-threshold-section h2 {
+      font-size: 1rem;
+      font-weight: bold;
+      margin-top: 2rem;
+      margin-bottom: 0.25rem;
+    }
+    .ph-threshold-section p {
+      margin: 0;
+      margin-bottom: 1rem;
+      font-size: 0.9em;
+      color: #666;
+    }
+    .ph-threshold-section .ph-box .sensor-config button {
+      width: 275px;
+    }
+    .ph-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+    .ph-box {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ph-box .sensor-config {
+      margin: 0;
+    }
+
+    /* Mobile friendly adjustments */
+    @media (max-width: 600px) {
+      .logo img {
+        width: 90px;
+        height: 36px;
+      }
+      .login-btn {
+        width: 150px;
+        height: 40px;
+        font-size: 1rem;
+        padding: 0.3rem 0.5rem;
+      }
+      .tank-demo svg, .arc-gauge {
+        width: 80vw;
+        height: auto;
+        max-width: 325px;
+      }
+      .btn-download {
+        width: 150px;
+        height: 40px;
+        font-size: 1rem;
+        padding: 0.3rem 0.5rem;
+      }
+      .sensor-config button {
+        width: 50px;
+        height: 40px;
+        font-size: 1rem;
+      }
+      input {
+        font-size: 1rem;
+      }
+      .ph-inputs {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -119,28 +283,87 @@
     </picture>
   </a>
 
+  <!-- Login Button with icon and red text -->
+  <a href="/logout" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+
   <main class="container">
-    <h1>System Settings</h1>
+    <!-- Header -->
+    <header>
+      <h1 class="header-title">Settings Menu</h1>
+      <div class="header-underline"></div>
+    </header>
     <form>
       <h2>Timelapse Configuration</h2>
       <div class="grid">
         <label for="hours-to-run">
           Hours to Run
-          <input type="number" id="hours-to-run" name="hours-to-run" placeholder="Hours">
+          <input type="number" id="hours-to-run" name="hours-to-run" placeholder="Hours" />
         </label>
         <label for="images-per-hour">
           Images per hour
-          <input type="number" id="images-per-hour" name="images-per-hour" placeholder="Images">
+          <input type="number" id="images-per-hour" name="images-per-hour" placeholder="Images" />
         </label>
       </div>
-      <a href="/logout" class="button">Logout</a>
+      
+      <!-- Water Level Threshold -->
+      <h2>Sensor Configuration</h2>
+      <div class="water-threshold-config">
+        <label for="sensor-level">Water level threshold:</label>
+        <p>Modify the threshold percentage for triggering the warning notification</p>
+      </div>
+      <div class="sensor-config">
+        <div class="input-icon-container">
+          <span class="icon"><i class="fas fa-tint"></i></span>
+          <input type="text" id="sensor-level" name="sensor-level" value="30%" readonly />
+        </div>
+        <button type="button" id="decrement-btn"><i class="fas fa-minus"></i></button>
+        <button type="button" id="increment-btn"><i class="fas fa-plus"></i></button>
+      </div>
+
+      <!-- pH Threshold Section -->
+      <section class="ph-threshold-section">
+        <h2>pH threshold:</h2>
+        <p>Modify the minimum and maximum threshold for the pH to trigger a notification</p>
+        <div class="ph-labels" style="display: grid; grid-template-columns: 1fr 1fr; text-align: center; margin-bottom: 1rem;">
+          <div>Minimum</div>
+          <div>Maximum</div>
+        </div>
+        <div class="ph-inputs">
+          <!-- Minimum pH box -->
+          <div class="ph-box">
+            <div class="sensor-config">
+              <div class="input-icon-container">
+                <span class="icon"><i class="fas fa-flask"></i></span>
+                <input type="text" id="ph-min" name="ph-min" value="6.5" readonly />
+              </div>
+            </div>
+            <div class="sensor-config">
+              <button type="button" id="decrement-ph-min"><i class="fas fa-minus"></i></button>
+              <button type="button" id="increment-ph-min"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+          <!-- Maximum pH box -->
+          <div class="ph-box">
+            <div class="sensor-config">
+              <div class="input-icon-container">
+                <span class="icon"><i class="fas fa-flask"></i></span>
+                <input type="text" id="ph-max" name="ph-max" value="7.5" readonly />
+              </div>
+            </div>
+            <div class="sensor-config">
+              <button type="button" id="decrement-ph-max"><i class="fas fa-minus"></i></button>
+              <button type="button" id="increment-ph-max"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
     </form>
   </main>
 
   <!-- Tank Fill Demo -->
   <section class="tank-demo">
     <h2>Tank Fill Demo</h2>
-    <!-- Water Level Gauge (exactly copied from index.html) -->
+    <!-- Water Level Gauge -->
     <svg class="arc-gauge" viewBox="0 0 100 100">
       <path class="track" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
       <path class="progress" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
@@ -148,18 +371,18 @@
       <text class="gauge-subtext" x="50" y="68">Water level</text>
       <text class="demo-note" x="50" y="80">For demonstration purposes only*</text>
     </svg>
-
-    <!-- Refill Tank button with download-style and icon -->
+    <!-- Refill Tank button -->
     <button id="fillTankButton" class="btn-download"><i class="fas fa-tint"></i> Refill Tank</button>
   </section>
 
   <script>
-    // Function to update gauge using /water_data (sets the initial percentage)
+    // ----------------- Water Level Gauge ----------------- //
     function updateGauge() {
       const gaugeSVG = document.querySelector('.arc-gauge');
       const progressPath = gaugeSVG.querySelector('.progress');
       const percentageText = gaugeSVG.querySelector('.percentage');
       const totalArcLength = 160.57;
+
       fetch('/water_data')
         .then(response => response.json())
         .then(data => {
@@ -167,28 +390,27 @@
           const offset = totalArcLength - (sensorPercentage / 100) * totalArcLength;
           progressPath.style.strokeDashoffset = offset.toFixed(2);
           percentageText.textContent = sensorPercentage.toFixed(0) + '%';
+
+          // Update water threshold input
+          const sensorLevelInput = document.getElementById("sensor-level");
+          if (sensorLevelInput) {
+            sensorLevelInput.value = sensorPercentage.toFixed(0) + '%';
+          }
         })
         .catch(error => console.error('Error fetching water data:', error));
     }
 
-    // Called when the user clicks "Refill Tank".
+    // Animate tank fill
     function fillTank() {
       const button = document.getElementById("fillTankButton");
-      button.disabled = true; // disable button during filling
-
-      // Select gauge elements
+      button.disabled = true;
       const gaugeSVG = document.querySelector('.arc-gauge');
       const progressPath = gaugeSVG.querySelector('.progress');
       const percentageText = gaugeSVG.querySelector('.percentage');
-
-      // The total arc length must match stroke-dasharray
       const totalArcLength = 160.57;
-
-      // Current gauge value (parsed from the text which was updated on page load)
       let currentValue = parseFloat(percentageText.textContent) || 0;
-      const targetValue = 100; // fill up to 100%
+      const targetValue = 100;
 
-      // Repeatedly flash LED (via /flashLED) every 500ms while filling
       const ledInterval = setInterval(() => {
         fetch('/flashLED', { method: 'POST' })
           .then(response => response.text())
@@ -196,26 +418,77 @@
           .catch(error => console.error("Error flashing LED:", error));
       }, 500);
 
-      // Animate gauge fill from currentValue to targetValue
       const fillInterval = setInterval(() => {
         if (currentValue < targetValue) {
           currentValue++;
-          // Recompute stroke-dashoffset
           const offset = totalArcLength - (currentValue / 100) * totalArcLength;
           progressPath.style.strokeDashoffset = offset.toFixed(2);
           percentageText.textContent = currentValue.toFixed(0) + '%';
+          const sensorLevelInput = document.getElementById("sensor-level");
+          if (sensorLevelInput) {
+            sensorLevelInput.value = currentValue.toFixed(0) + '%';
+          }
         } else {
-          // Stop intervals and re-enable the button when done
           clearInterval(fillInterval);
           clearInterval(ledInterval);
           button.disabled = false;
         }
-      }, 50); // speed of fill (ms per increment)
+      }, 50);
     }
 
+    // ----------------- Event Listeners ----------------- //
     document.addEventListener("DOMContentLoaded", function() {
-      updateGauge(); // Ensure the gauge is visible and initialized on page load
-      document.getElementById("fillTankButton").addEventListener("click", fillTank);
+      updateGauge();
+
+      document.getElementById("decrement-btn").addEventListener("click", function() {
+        const sensorLevelInput = document.getElementById("sensor-level");
+        let currentValue = parseFloat(sensorLevelInput.value) || 0;
+        if (currentValue > 0) {
+          currentValue--;
+          sensorLevelInput.value = currentValue + '%';
+          localStorage.setItem("sensorLevel", sensorLevelInput.value);
+        }
+      });
+
+      document.getElementById("increment-btn").addEventListener("click", function() {
+        const sensorLevelInput = document.getElementById("sensor-level");
+        let currentValue = parseFloat(sensorLevelInput.value) || 0;
+        if (currentValue < 100) {
+          currentValue++;
+          sensorLevelInput.value = currentValue + '%';
+          localStorage.setItem("sensorLevel", sensorLevelInput.value);
+        }
+      });
+
+      // Similarly for pH thresholds:
+      document.getElementById("decrement-ph-min").addEventListener("click", function() {
+        const phMinInput = document.getElementById("ph-min");
+        let currentValue = parseFloat(phMinInput.value) || 0;
+        currentValue = Math.max(0, currentValue - 0.1);
+        phMinInput.value = currentValue.toFixed(1);
+        localStorage.setItem("phMin", phMinInput.value);
+      });
+      document.getElementById("increment-ph-min").addEventListener("click", function() {
+        const phMinInput = document.getElementById("ph-min");
+        let currentValue = parseFloat(phMinInput.value) || 0;
+        currentValue += 0.1;
+        phMinInput.value = currentValue.toFixed(1);
+        localStorage.setItem("phMin", phMinInput.value);
+      });
+      document.getElementById("decrement-ph-max").addEventListener("click", function() {
+        const phMaxInput = document.getElementById("ph-max");
+        let currentValue = parseFloat(phMaxInput.value) || 0;
+        currentValue = Math.max(0, currentValue - 0.1);
+        phMaxInput.value = currentValue.toFixed(1);
+        localStorage.setItem("phMax", phMaxInput.value);
+      });
+      document.getElementById("increment-ph-max").addEventListener("click", function() {
+        const phMaxInput = document.getElementById("ph-max");
+        let currentValue = parseFloat(phMaxInput.value) || 0;
+        currentValue += 0.1;
+        phMaxInput.value = currentValue.toFixed(1);
+        localStorage.setItem("phMax", phMaxInput.value);
+      });
     });
   </script>
 </body>

@@ -591,6 +591,41 @@
       if (document.querySelector('.tabs a[href="#timelapse"]').classList.contains('active')) {
         loadTimelapseVideos();
       }
+      
+      document.addEventListener("DOMContentLoaded", function() {
+        // Retrieve stored values on load
+        const storedWaterLevel = localStorage.getItem("sensorLevel");
+        if (storedWaterLevel) {
+          const waterLabel = document.querySelector('.arc-gauge .percentage');
+          waterLabel.textContent = storedWaterLevel;
+          // Update any related gauge progress if necessary
+        }
+        
+        const storedPHMin = localStorage.getItem("phMin");
+        const storedPHMax = localStorage.getItem("phMax");
+        if (storedPHMin && storedPHMax) {
+          // Assuming you have elements for pH gauge thresholds
+          // For example, updating the pH gauge text:
+          const phLabel = document.querySelector('.arc-gauge-ph .percentage');
+          // You can decide whether to show one of the thresholds or both,
+          // Or update them as a range indicator somewhere in the UI.
+          phLabel.textContent = `${storedPHMin} - ${storedPHMax}`;
+        }
+      });
+
+      // Listen for changes made in another tab/window
+      window.addEventListener("storage", function(event) {
+        if (event.key === "sensorLevel") {
+          const waterLabel = document.querySelector('.arc-gauge .percentage');
+          waterLabel.textContent = event.newValue;
+        }
+        if (event.key === "phMin" || event.key === "phMax") {
+          const storedPHMin = localStorage.getItem("phMin");
+          const storedPHMax = localStorage.getItem("phMax");
+          const phLabel = document.querySelector('.arc-gauge-ph .percentage');
+          phLabel.textContent = `${storedPHMin} - ${storedPHMax}`;
+        }
+      });
     });
   </script>
 </body>
