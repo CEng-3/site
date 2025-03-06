@@ -408,8 +408,30 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       const totalArcLength = 160.57; // common arc length for both gauges
-      const lowWaterThreshold = 30;  // example threshold
-      const minPH = 6.0, maxPH = 7.0;  // acceptable pH range
+      let lowWaterThreshold = 20;  // default threshold
+      let minPH = 6.0, maxPH = 7.5;  // default pH range
+
+      // Load thresholds from server
+      function loadThresholds() {
+        fetch('/get_thresholds')
+          .then(response => response.json())
+          .then(data => {
+            // Update threshold values
+            lowWaterThreshold = data.water_level_threshold;
+            minPH = data.ph_min_threshold;
+            maxPH = data.ph_max_threshold;
+            
+            // Update notification bar with new thresholds
+            updateNotificationBar();
+          })
+          .catch(error => console.error('Error loading thresholds:', error));
+      }
+
+      // Load thresholds when page loads
+      loadThresholds();
+
+      // Check for new thresholds periodically
+      setInterval(loadThresholds, 30000); // Check every 30 seconds
 
       // --- Water Level Gauge Elements ---
       const waterGauge = document.querySelector('.arc-gauge:not(.arc-gauge-ph)');
