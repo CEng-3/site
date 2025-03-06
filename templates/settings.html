@@ -11,30 +11,25 @@
   <link rel="icon" type="image/x-icon" href="tus-icon.ico" />
 
   <style>
-    /* Header styling for title and underline */
-    header {
-      text-align: center;
-      margin-top: 2rem;
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
     }
     .header-title {
       margin: 0;
       font-size: 2rem;
+      text-align: center; /* Center the title in all views */
+      width: 100%; /* Full width to ensure centering works */
     }
     .header-underline {
       width: 80%;
       max-width: 500px;
-      margin: 0.25rem auto 5rem;
+      margin: 0.25rem auto 2rem; /* Reduced bottom margin from 5rem to 2rem */
       border-bottom: 1px solid #dee2e6;
     }
     
-    /* Logo positioning */
-    .logo {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 1001;
-      transition: transform 0.3s ease;
-    }
     .logo img {
       width: 120px;
       height: 48px;
@@ -68,7 +63,12 @@
     /* Gauge Container */
     .tank-demo {
       text-align: center;
-      margin: 2rem;
+      margin: 0 2rem 2rem; /* Changed from 2rem to 0 2rem 2rem to remove top margin */
+      padding-top: 0.5rem; /* Add slight padding at top */
+      border-top: 1px solid #dee2e6; /* Optional: add subtle separator */
+    }
+    .tank-demo h2 {
+      margin-top: 1rem; /* Ensure some space after the separator */
     }
     .tank-demo svg {
       width: 325px;
@@ -80,7 +80,7 @@
     /* Arc Gauge Styling */
     .arc-gauge {
       display: block;
-      margin: -2rem auto;
+      margin: 0 auto; /* Changed from -2rem auto to 0 auto */
       width: 325px;
       height: 325px;
     }
@@ -175,7 +175,6 @@
     .sensor-config button {
       padding: 0.5rem;
       border: 1px solid #ccc;
-      background: transparent;
       cursor: pointer;
       border-radius: 0.25rem;
       font-size: 1.25rem;
@@ -184,9 +183,26 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      background-color: #f5f5f5; /* Light background for buttons in light mode */
     }
     .sensor-config button:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .sensor-config button i {
+      color: #333; /* Darker color for button icons */
+    }
+    
+    /* Dark mode specific styles */
+    @media (prefers-color-scheme: dark) {
+      .sensor-config button {
+        background-color: transparent; /* Original transparent background for dark mode */
+      }
+      .sensor-config button i {
+        color: #ddd; /* Keep the lighter icon color for dark mode */
+      }
+      .sensor-config button:hover {
+        background: rgba(255, 255, 255, 0.1); /* Lighter hover effect for dark mode */
+      }
     }
 
     /* Water level threshold title and description */
@@ -217,8 +233,8 @@
       font-size: 0.9em;
       color: #666;
     }
-    .ph-threshold-section .ph-box .sensor-config button {
-      width: 275px;
+    .ph-threshold-section .sensor-config button {
+      width: 60px; /* Make buttons consistent size */
     }
     .ph-inputs {
       display: grid;
@@ -235,45 +251,209 @@
     .ph-box .sensor-config {
       margin: 0;
     }
+    .ph-box .button-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .ph-box-label {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
 
     /* Mobile friendly adjustments */
     @media (max-width: 600px) {
+      .site-header {
+        padding: 10px;
+        flex-wrap: nowrap; /* Prevent wrapping */
+        justify-content: space-between; /* Space items evenly */
+        margin-bottom: 20px; /* Reduce bottom margin */
+      }
+      
+      .logo {
+        margin-right: 0; /* Remove right margin */
+      }
+      
       .logo img {
         width: 90px;
         height: 36px;
       }
+      
       .login-btn {
-        width: 150px;
-        height: 40px;
-        font-size: 1rem;
-        padding: 0.3rem 0.5rem;
+        position: static; /* Reset positioning to normal flow */
+        width: auto; /* Let width be determined by content */
+        min-width: 100px; /* Set minimum width */
+        height: 36px; /* Match logo height */
+        font-size: 0.9rem;
+        padding: 0.2rem 0.5rem;
       }
+      
+      .header-title {
+        font-size: 1.5rem; /* Smaller heading for mobile */
+        /* No need to repeat text-align center as it's now in the main style */
+      }
+      
       .tank-demo svg, .arc-gauge {
         width: 80vw;
         height: auto;
         max-width: 325px;
       }
+      
       .btn-download {
         width: 150px;
         height: 40px;
         font-size: 1rem;
         padding: 0.3rem 0.5rem;
       }
-      .sensor-config button {
-        width: 50px;
-        height: 40px;
-        font-size: 1rem;
+      
+      .sensor-config {
+        flex-wrap: wrap; /* Allow wrapping on very small screens */
       }
+      
+      .sensor-config .input-icon-container {
+        min-width: 120px; /* Ensure minimum width */
+      }
+      
+      .sensor-config button {
+        width: 100px; /* Slightly smaller buttons on mobile */
+        height: 40px;
+        font-size: 0.9rem;
+        padding: 0.2rem;
+        margin: 0.1rem;
+      }
+      
       input {
         font-size: 1rem;
+        padding: 0.5rem 0.3rem 0.5rem 2.2rem;
       }
+      
       .ph-inputs {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Stack on mobile */
+        gap: 2rem;
+      }
+      
+      /* Remove the pH labels div in mobile view since we'll show labels with each box */
+      .ph-labels {
+        display: none !important;
+      }
+      
+      .ph-box-label {
+        display: block;
+        text-align: left;
+      }
+      
+      /* Better fit pH adjustment buttons on mobile */
+      .ph-box .button-row {
+        justify-content: center;
+      }
+      
+      /* Add more bottom padding to ensure content isn't cut off */
+      main.container {
+        padding-bottom: 3rem;
+      }
+    }
+
+    /* Fix button styling in pH threshold section */
+    .ph-box .button-row button {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      border-radius: 0.25rem;
+      font-size: 1.25rem;
+      width: 200px; /* Doubled from 100px to 200px */
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f5; /* Light background for buttons in light mode */
+    }
+    
+    .ph-box .button-row button:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .ph-box .button-row button i {
+      color: #333; /* Darker color for button icons */
+    }
+    
+    /* Dark mode specific styles */
+    @media (prefers-color-scheme: dark) {
+      .ph-box .button-row button {
+        background-color: transparent; /* Original transparent background for dark mode */
+      }
+      .ph-box .button-row button i {
+        color: #ddd; /* Keep the lighter icon color for dark mode */
+      }
+      .ph-box .button-row button:hover {
+        background: rgba(255, 255, 255, 0.1); /* Lighter hover effect for dark mode */
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .ph-box .button-row button {
+        width: 160px; /* Doubled from 80px to 160px */
+        height: 40px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Water level threshold buttons row styling to match pH section */
+    .water-button-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center; /* Center the buttons instead of left-align */
+      margin-top: 0.5rem;
+    }
+    
+    .water-button-row button {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      border-radius: 0.25rem;
+      font-size: 1.25rem;
+      width: 200px; /* Doubled from 100px to 200px */
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f5; /* Light background for buttons in light mode */
+    }
+    
+    .water-button-row button:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .water-button-row button i {
+      color: #333; /* Darker color for button icons */
+    }
+    
+    /* Dark mode specific styles */
+    @media (prefers-color-scheme: dark) {
+      .water-button-row button {
+        background-color: transparent; /* Original transparent background for dark mode */
+      }
+      
+      .water-button-row button i {
+        color: #ddd; /* Keep the lighter icon color for dark mode */
+      }
+      
+      .water-button-row button:hover {
+        background: rgba(255, 255, 255, 0.1); /* Lighter hover effect for dark mode */
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .water-button-row button {
+        width: 160px; /* Doubled from 80px to 160px */
+        height: 40px;
+        font-size: 0.9rem;
       }
     }
   </style>
 </head>
 <body>
+<header class="site-header">
   <!-- Logo -->
   <a href="#" class="logo">
     <picture>
@@ -285,6 +465,7 @@
 
   <!-- Login Button with icon and red text -->
   <a href="/logout" class="login-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</header>
 
   <main class="container">
     <!-- Header -->
@@ -316,6 +497,8 @@
           <span class="icon"><i class="fas fa-tint"></i></span>
           <input type="text" id="sensor-level" name="sensor-level" value="30%" readonly />
         </div>
+      </div>
+      <div class="water-button-row">
         <button type="button" id="decrement-btn"><i class="fas fa-minus"></i></button>
         <button type="button" id="increment-btn"><i class="fas fa-plus"></i></button>
       </div>
@@ -324,33 +507,32 @@
       <section class="ph-threshold-section">
         <h2>pH threshold:</h2>
         <p>Modify the minimum and maximum threshold for the pH to trigger a notification</p>
-        <div class="ph-labels" style="display: grid; grid-template-columns: 1fr 1fr; text-align: center; margin-bottom: 1rem;">
-          <div>Minimum</div>
-          <div>Maximum</div>
-        </div>
+        <!-- Remove the duplicate pH labels div -->
         <div class="ph-inputs">
           <!-- Minimum pH box -->
           <div class="ph-box">
+            <div class="ph-box-label">Minimum</div>
             <div class="sensor-config">
               <div class="input-icon-container">
                 <span class="icon"><i class="fas fa-flask"></i></span>
                 <input type="text" id="ph-min" name="ph-min" value="6.5" readonly />
               </div>
             </div>
-            <div class="sensor-config">
+            <div class="button-row">
               <button type="button" id="decrement-ph-min"><i class="fas fa-minus"></i></button>
               <button type="button" id="increment-ph-min"><i class="fas fa-plus"></i></button>
             </div>
           </div>
           <!-- Maximum pH box -->
           <div class="ph-box">
+            <div class="ph-box-label">Maximum</div>
             <div class="sensor-config">
               <div class="input-icon-container">
                 <span class="icon"><i class="fas fa-flask"></i></span>
                 <input type="text" id="ph-max" name="ph-max" value="7.5" readonly />
               </div>
             </div>
-            <div class="sensor-config">
+            <div class="button-row">
               <button type="button" id="decrement-ph-max"><i class="fas fa-minus"></i></button>
               <button type="button" id="increment-ph-max"><i class="fas fa-plus"></i></button>
             </div>
@@ -358,22 +540,22 @@
         </div>
       </section>
     </form>
+  
+    <!-- Tank Fill Demo - Moved inside the main container -->
+    <section class="tank-demo">
+      <h2>Tank Fill Demo</h2>
+      <!-- Water Level Gauge -->
+      <svg class="arc-gauge" viewBox="0 0 100 100">
+        <path class="track" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
+        <path class="progress" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
+        <text class="percentage" x="50" y="47">0%</text>
+        <text class="gauge-subtext" x="50" y="68">Water level</text>
+        <text class="demo-note" x="50" y="80">For demonstration purposes only*</text>
+      </svg>
+      <!-- Refill Tank button -->
+      <button id="fillTankButton" class="btn-download"><i class="fas fa-tint"></i> Refill Tank</button>
+    </section>
   </main>
-
-  <!-- Tank Fill Demo -->
-  <section class="tank-demo">
-    <h2>Tank Fill Demo</h2>
-    <!-- Water Level Gauge -->
-    <svg class="arc-gauge" viewBox="0 0 100 100">
-      <path class="track" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
-      <path class="progress" d="M 13.75,66.90 A 40 40 0 1 1 86.25,66.90" />
-      <text class="percentage" x="50" y="47">0%</text>
-      <text class="gauge-subtext" x="50" y="68">Water level</text>
-      <text class="demo-note" x="50" y="80">For demonstration purposes only*</text>
-    </svg>
-    <!-- Refill Tank button -->
-    <button id="fillTankButton" class="btn-download"><i class="fas fa-tint"></i> Refill Tank</button>
-  </section>
 
   <script>
     // ----------------- Water Level Gauge ----------------- //
