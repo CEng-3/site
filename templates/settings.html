@@ -436,17 +436,76 @@
       }, 50);
     }
 
-    // ----------------- Event Listeners ----------------- //
-    document.addEventListener("DOMContentLoaded", function() {
-      updateGauge();
+    // Function to load thresholds from the server
+    function loadThresholds() {
+      fetch('/get_thresholds')
+        .then(response => response.json())
+        .then(data => {
+          // Update water level threshold
+          const sensorLevelInput = document.getElementById("sensor-level");
+          if (sensorLevelInput) {
+            sensorLevelInput.value = data.water_level_threshold + "%";
+          }
+          
+          // Update pH thresholds
+          const phMinInput = document.getElementById("ph-min");
+          if (phMinInput) {
+            phMinInput.value = data.ph_min_threshold.toFixed(1);
+          }
+          
+          const phMaxInput = document.getElementById("ph-max");
+          if (phMaxInput) {
+            phMaxInput.value = data.ph_max_threshold.toFixed(1);
+          }
+        })
+        .catch(error => console.error('Error fetching thresholds:', error));
+    }
 
+    // Function to save thresholds to server
+    function saveThresholds() {
+      // Parse values from inputs
+      const waterThreshold = parseFloat(document.getElementById("sensor-level").value) || 20;
+      const phMinThreshold = parseFloat(document.getElementById("ph-min").value) || 6.0;
+      const phMaxThreshold = parseFloat(document.getElementById("ph-max").value) || 7.5;
+      
+      // Send to server
+      fetch('/save_thresholds', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          water_level_threshold: waterThreshold,
+          ph_min_threshold: phMinThreshold,
+          ph_max_threshold: phMaxThreshold
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status !== "success") {
+          alert("Error saving thresholds: " + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error saving thresholds:', error);
+        alert("Error saving thresholds. Please try again.");
+      });
+    }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+      // Load thresholds on page load
+      loadThresholds();
+
+      // Modify existing event listeners to save thresholds to server
       document.getElementById("decrement-btn").addEventListener("click", function() {
         const sensorLevelInput = document.getElementById("sensor-level");
         let currentValue = parseFloat(sensorLevelInput.value) || 0;
         if (currentValue > 0) {
           currentValue--;
           sensorLevelInput.value = currentValue + '%';
-          localStorage.setItem("sensorLevel", sensorLevelInput.value);
+          
+          // Save thresholds after changing
+          saveThresholds();
         }
       });
 
@@ -456,7 +515,9 @@
         if (currentValue < 100) {
           currentValue++;
           sensorLevelInput.value = currentValue + '%';
-          localStorage.setItem("sensorLevel", sensorLevelInput.value);
+          
+          // Save thresholds after changing
+          saveThresholds();
         }
       });
 
@@ -466,28 +527,36 @@
         let currentValue = parseFloat(phMinInput.value) || 0;
         currentValue = Math.max(0, currentValue - 0.1);
         phMinInput.value = currentValue.toFixed(1);
-        localStorage.setItem("phMin", phMinInput.value);
+        
+        // Save thresholds after changing
+        saveThresholds();
       });
       document.getElementById("increment-ph-min").addEventListener("click", function() {
         const phMinInput = document.getElementById("ph-min");
         let currentValue = parseFloat(phMinInput.value) || 0;
         currentValue += 0.1;
         phMinInput.value = currentValue.toFixed(1);
-        localStorage.setItem("phMin", phMinInput.value);
+        
+        // Save thresholds after changing
+        saveThresholds();
       });
       document.getElementById("decrement-ph-max").addEventListener("click", function() {
         const phMaxInput = document.getElementById("ph-max");
         let currentValue = parseFloat(phMaxInput.value) || 0;
         currentValue = Math.max(0, currentValue - 0.1);
         phMaxInput.value = currentValue.toFixed(1);
-        localStorage.setItem("phMax", phMaxInput.value);
+        
+        // Save thresholds after changing
+        saveThresholds();
       });
       document.getElementById("increment-ph-max").addEventListener("click", function() {
         const phMaxInput = document.getElementById("ph-max");
         let currentValue = parseFloat(phMaxInput.value) || 0;
         currentValue += 0.1;
         phMaxInput.value = currentValue.toFixed(1);
-        localStorage.setItem("phMax", phMaxInput.value);
+        
+        // Save thresholds after changing
+        saveThresholds();
       });
     });
   </script>
