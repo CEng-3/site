@@ -6,6 +6,9 @@ import io
 import os
 import traceback
 import random
+import socket
+import pickle
+import struct
 
 from flask import Flask, Response, render_template, request, session, redirect, url_for, jsonify
 
@@ -134,6 +137,48 @@ def gen_frames():
                    b'Content-Type: image/jpeg\r\n\r\n' +
                    get_fallback_frame() + b'\r\n')
             time.sleep(0.2)
+            
+def receive_frames():
+    """Connect to Pi B and receive the camera feed."""
+    PI_B_IP = "192.168.64.120"
+    PORT = 5001
+    data = b""
+    payload_size = struct.calcsize("Q")
+
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.settimeout(5)  # Avoid long hangs if Pi B is unreachable
+        client_socket.connect((PI_B_IP, PORT))
+
+        while True:
+            while len(data) < payload_size:
+                packet = client_socket.recv(4096)
+                if not packet:
+                    raise ConnectionError("Disconnected from Pi B")
+                data += packet
+
+            packed_msg_size = data[:payload_size]
+            data = data[payload_size:]
+            msg_size = struct.unpack("Q", packed_msg_size)[0]
+
+            while len(data) < msg_size:
+                data += client_socket.recv(4096)
+
+            frame_data = data[:msg_size]
+            data = data[msg_size:]
+
+            frame = pickle.loads(frame_data)
+            _, buffer = cv2.imencode('.jpg', frame)
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' +
+                   buffer.tobytes() + b'\r\n')
+    except Exception as e:
+        print(f"[WARNING] Failed to connect to Pi B: {e}")
+        while True:
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' +
+                   get_fallback_frame() + b'\r\n')  # Show fallback image
 
 # Flask Routes
 @app.route('/')
@@ -153,6 +198,10 @@ def water_data():
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/video_feed_pi_b')
+def video_feed_pi_b():
+    return Response(receive_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/sensor_history')
 def sensor_history():
