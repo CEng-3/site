@@ -558,6 +558,17 @@
         // Save thresholds after changing
         saveThresholds();
       });
+      
+      // Add event listener for the Fill Tank button
+      document.getElementById("fillTankButton").addEventListener("click", function() {
+        fillTank();
+      });
+      
+      // Initialize gauge on page load
+      updateGauge();
+      
+      // Update gauge periodically
+      setInterval(updateGauge, 10000);
     });
   </script>
 </body>
