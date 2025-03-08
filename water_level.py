@@ -7,8 +7,8 @@ from DFRobot_ADS1115 import ADS1115
 # Configuration constants
 TARGET_DEPTH = 227.0       # mm (target depth for a full tank)
 REFILL_THRESHOLD = 10.0    # % change needed to register a refill event
-SAMPLE_INTERVAL = 0.5        #5 seconds between sensor readings
-CYCLE_DURATION = 30    #5* 5-minute cycle (300 seconds)
+SAMPLE_INTERVAL = 5        #5 seconds between sensor readings
+CYCLE_DURATION = 300    #5* 5-minute cycle (300 seconds)
 NUM_SAMPLES = int(CYCLE_DURATION / SAMPLE_INTERVAL)
 
 # File that the website reads for current water percentage
