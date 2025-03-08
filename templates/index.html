@@ -417,6 +417,47 @@
       let lowWaterThreshold = 20;  // default threshold
       let minPH = 6.0, maxPH = 7.5;  // default pH range
 
+      // --- Water Level Gauge Elements ---
+      const waterGauge = document.querySelector('.arc-gauge:not(.arc-gauge-ph)');
+      const waterProgressPath = waterGauge.querySelector('.progress');
+      const waterLabel = waterGauge.querySelector('.percentage');
+
+      // --- pH Gauge Elements ---
+      const phGauge = document.querySelector('.arc-gauge-ph');
+      const phProgressPath = phGauge.querySelector('.progress');
+      const phLabel = phGauge.querySelector('.percentage');
+
+      // Load initial readings from the CSV file when page loads
+      async function loadInitialReadings() {
+        try {
+          const response = await fetch('/initial_readings');
+          const data = await response.json();
+          
+          // Update pH gauge
+          const phValue = data.ph;
+          const phOffset = totalArcLength - (phValue / 14) * totalArcLength;
+          phProgressPath.style.strokeDashoffset = phOffset.toFixed(2);
+          phLabel.textContent = phValue.toFixed(1);
+          const phColor = getPHColor(phValue);
+          phProgressPath.style.stroke = phColor;
+          phLabel.style.fill = phColor;
+          
+          // Update water gauge
+          const sensorPercentage = parseFloat(data.water);
+          const waterOffset = totalArcLength - (sensorPercentage / 100) * totalArcLength;
+          waterProgressPath.style.strokeDashoffset = waterOffset.toFixed(2);
+          waterLabel.textContent = Math.round(sensorPercentage) + '%';
+          
+          // Update notification bar with initial values
+          updateNotificationBar();
+        } catch (error) {
+          console.error('Error fetching initial readings:', error);
+        }
+      }
+      
+      // Load initial readings when page loads
+      loadInitialReadings();
+      
       // Load thresholds from server
       function loadThresholds() {
         fetch('/get_thresholds')
@@ -439,16 +480,6 @@
       // Check for new thresholds periodically
       setInterval(loadThresholds, 30000); // Check every 30 seconds
 
-      // --- Water Level Gauge Elements ---
-      const waterGauge = document.querySelector('.arc-gauge:not(.arc-gauge-ph)');
-      const waterProgressPath = waterGauge.querySelector('.progress');
-      const waterLabel = waterGauge.querySelector('.percentage');
-
-      // --- pH Gauge Elements ---
-      const phGauge = document.querySelector('.arc-gauge-ph');
-      const phProgressPath = phGauge.querySelector('.progress');
-      const phLabel = phGauge.querySelector('.percentage');
-
       // Function to get a color based on pH value
       function getPHColor(ph) {
         if (ph < 4) return "#FF0000";
@@ -466,7 +497,22 @@
         try {
           const response = await fetch('/ph_data');
           const data = await response.json();
-          const phValue = data.ph;
+          let phValue = data.ph;
+          
+          // Store the last valid pH value
+          if (!window.lastValidPH) {
+            window.lastValidPH = 7.0; // Default neutral pH
+          }
+          
+          // Check if pH is negative, use last valid value if it is
+          if (phValue < 0) {
+            console.warn('Received negative pH value, using last valid value instead');
+            phValue = window.lastValidPH;
+          } else {
+            // Update the last valid pH value
+            window.lastValidPH = phValue;
+          }
+          
           const phOffset = totalArcLength - (phValue / 14) * totalArcLength;
           phProgressPath.style.strokeDashoffset = phOffset.toFixed(2);
           phLabel.textContent = phValue.toFixed(1);
@@ -488,7 +534,7 @@
           const sensorPercentage = parseFloat(data.water);
           const waterOffset = totalArcLength - (sensorPercentage / 100) * totalArcLength;
           waterProgressPath.style.strokeDashoffset = waterOffset.toFixed(2);
-          waterLabel.textContent = sensorPercentage.toFixed(1) + '%';
+          waterLabel.textContent = Math.round(sensorPercentage) + '%';
         } catch (error) {
           console.error('Error fetching water data:', error);
         }

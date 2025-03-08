@@ -76,7 +76,12 @@ if GPIO:
 def get_ph_reading():
     if ph_sensor_available:
         try:
-            return read_ph()
+            ph_value = read_ph()
+            # Check for negative values and use previous value if needed
+            if ph_value < 0:
+                previous_readings = get_latest_readings()
+                ph_value = previous_readings['ph']
+            return ph_value
         except Exception as e:
             print(f"Error reading pH: {e}")
             return 7.0
@@ -88,13 +93,13 @@ def get_water_reading():
     if water_sensor_available:
         try:
             _, cycle_low = record_water_cycle()
-            return cycle_low
+            return int(cycle_low)
         except Exception as e:
             print(f"Error reading water level: {e}")
-            return 50.0
+            return 50
     else:
         # Simulated water level
-        return round(random.uniform(40.0, 80.0), 1)
+        return round(random.uniform(40.0, 80.0))
 
 def get_fallback_frame():
     """Return a fallback image when camera is unavailable"""
@@ -109,7 +114,7 @@ def get_fallback_frame():
         print(f"Error loading fallback image: {e}")
     
     # Minimal valid JPEG if all else fails
-    return b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00\x01\x00\x01\x00\x00\xff\xdb\x00C\x00\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9=82<.342\xff\xdb\x00C\x01\t\t\t\x0c\x0b\x0c\x18\r\r\x182!\x1c!22222222222222222222222222222222222222222222222222\xff\xc0\x00\x11\x08\x00\x01\x00\x01\x03\x01"\x00\x02\x11\x01\x03\x11\x01\xff\xc4\x00\x1f\x00\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xc4\x00\xb5\x10\x00\x02\x01\x03\x03\x02\x04\x03\x05\x05\x04\x04\x00\x00\x01}\x01\x02\x03\x00\x04\x11\x05\x12!1A\x06\x13Qa\x07"q\x142\x81\x91\xa1\x08#B\xb1\xc1\x15R\xd1\xf0$3br\x82\t\n\x16\x17\x18\x19\x1a%&\'()*456789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz\x83\x84\x85\x86\x87\x88\x89\x8a\x92\x93\x94\x95\x96\x97\x98\x99\x9a\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xff\xc4\x00\x1f\x01\x00\x03\x01\x01\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xc4\x00\xb5\x11\x00\x02\x01\x02\x04\x04\x03\x04\x07\x05\x04\x04\x00\x01\x02w\x00\x01\x02\x03\x11\x04\x05!1\x06\x12AQ\x07aq\x13"2\x81\x08\x14B\x91\xa1\xb1\xc1\t#3R\xf0\x15br\xd1\n\x16$4\xe1%\xf1\x17\x18\x19\x1a&\'()*56789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x92\x93\x94\x95\x96\x97\x98\x99\x9a\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xff\xda\x00\x0c\x03\x01\x00\x02\x11\x03\x11\x00?\x00\xfe\xfe(\xa2\x8a\x00\xff\xd9'
+    return b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00\x01\x00\x01\x00\x00\xff\xdb\x00C\x00\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9=82<.342\xff\xdb\x00C\x01\t\t\t\x0c\x0b\x0c\x18\r\r\x182!\x1c!22222222222222222222222222222222222222222222222222\xff\xc0\x00\x11\x08\x00\x01\x00\x01\x03\x01"\x00\x02\x11\x01\x03\x11\x01\xff\xc4\x00\x1f\x00\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xc4\x00\xb5\x10\x00\x02\x01\x03\x03\x02\x04\x03\x05\x05\x04\x04\x00\x00\x01}\x01\x02\x03\x00\x04\x11\x05\x12!1A\x06\x13Qa\x07"q\x142\x81\x91\xa1\x08#B\xb1\xc1\x15R\xd1\xf0$3br\x82\t\n\x16\x17\x18\x19\x1a%&\'()*456789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz\x83\x84\x85\x86\x87\x88\x89\x8a\x92\x93\x94\x95\x96\x97\x98\x99\x9a\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xff\xc4\x00\x1f\x01\x00\x03\x01\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xc4\x00\xb5\x11\x00\x02\x01\x02\x04\x04\x03\x04\x07\x05\x04\x04\x00\x01\x02w\x00\x01\x02\x03\x11\x04\x05!1\x06\x12AQ\x07aq\x13"2\x81\x08\x14B\x91\xa1\xb1\xc1\t#3R\xf0\x15br\xd1\n\x16$4\xe1%\xf1\x17\x18\x19\x1a&\'()*56789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x92\x93\x94\x95\x96\x97\x98\x99\x9a\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xff\xda\x00\x0c\x03\x01\x00\x02\x11\x03\x11\x00?\x00\xfe\xfe(\xa2\x8a\x00\xff\xd9'
 
 def gen_frames():
     if camera_available and cv2_available and camera:
@@ -188,11 +193,21 @@ def index():
 @app.route('/ph_data')
 def ph_data():
     ph_value = get_ph_reading()
+    # Ensure the pH value is not negative
+    if ph_value < 0:
+        previous_readings = get_latest_readings()
+        ph_value = previous_readings['ph']
+    # Get the current water level to save both values
+    water_value = get_water_reading()
+    save_latest_readings(ph_value, water_value)
     return jsonify({'ph': float(ph_value)})
 
 @app.route('/water_data')
 def water_data():
     water_value = get_water_reading()
+    # Get the current pH value to save both values
+    ph_value = get_ph_reading()
+    save_latest_readings(ph_value, water_value)
     return jsonify({'water': float(water_value)})
 
 @app.route('/video_feed')
@@ -283,12 +298,12 @@ def background_sensor_logger():
                     readings.clear()
                     water_levels.clear()
                 
-                # Write to CSV
+                # Write to CSV with the corrected date format: DD-MM-YYYY
                 try:
                     with open('ph_hourly.csv', 'a', newline='') as csvfile:
                         writer = csv.writer(csvfile)
                         writer.writerow([
-                            next_hour.strftime('%Y-%m-%d'),
+                            next_hour.strftime('%d-%m-%Y'),  # Changed from '%Y-%m-%d' to '%d-%m-%Y'
                             next_hour.strftime('%H:%M:%S'),
                             f"{avg_ph:.1f}",
                             f"{min_water:.1f}"
@@ -457,6 +472,51 @@ def save_thresholds():
         print(f"Error saving thresholds: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# Define the path for the latest readings CSV file
+latest_readings_file = 'latest_readings.csv'
+
+# Function to save the latest sensor readings to CSV
+def save_latest_readings(ph_value, water_value):
+    try:
+        with open(latest_readings_file, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['ph', 'water'])
+            writer.writerow([ph_value, water_value])
+        print(f"Saved readings: pH={ph_value}, Water={water_value}")
+    except Exception as e:
+        print(f"Error saving latest readings: {e}")
+
+# Function to get the latest readings from CSV
+def get_latest_readings():
+    try:
+        if os.path.exists(latest_readings_file):
+            with open(latest_readings_file, 'r') as csvfile:
+                reader = csv.reader(csvfile)
+                next(reader)  # Skip header row
+                row = next(reader)  # Get the data row
+                ph_value = float(row[0])
+                # Ensure we don't return negative pH values
+                if ph_value < 0:
+                    ph_value = 7.0  # Default to neutral pH if value is negative
+                return {
+                    'ph': ph_value,
+                    'water': float(row[1])
+                }
+        # Return default values if file doesn't exist or is empty
+        return {'ph': 7.0, 'water': 50.0}
+    except Exception as e:
+        print(f"Error reading latest readings: {e}")
+        return {'ph': 7.0, 'water': 50.0}
+
+# Initialize the latest readings file if it doesn't exist
+def initialize_latest_readings():
+    if not os.path.exists(latest_readings_file):
+        save_latest_readings(7.0, 50.0)  # Default values
+
+@app.route('/initial_readings')
+def initial_readings():
+    return jsonify(get_latest_readings())
+
 # Main Execution
 if __name__ == '__main__':
     print("Aeroponic Tower Garden Website Starting...")
@@ -478,6 +538,9 @@ if __name__ == '__main__':
     
     # Initialize thresholds file
     initialize_thresholds()
+    
+    # Initialize latest readings file
+    initialize_latest_readings()
     
     # Start the background sensor logger thread
     logger_thread = threading.Thread(target=background_sensor_logger, daemon=True)
