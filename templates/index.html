@@ -391,6 +391,30 @@
       font-size: 0.9rem;
       border-top: 1px solid #dee2e6;
     }
+    /* Video responsive styles */
+    #timelapse-video {
+      width: 100%;
+      max-width: 640px;
+      height: auto;
+      display: block;
+      margin: 0 auto 1rem auto;
+      border-radius: 0.25rem;
+    }
+
+    /* Add a container with fixed aspect ratio for consistency */
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    @media (max-width: 480px) {
+      #timelapse-video {
+        max-width: 100%;
+      }
+    }
   </style>
   
 </head>
@@ -472,7 +496,7 @@
         <button class="camera-btn" data-camera="cam2">Camera 2</button>
       </div>
 
-      <video id="timelapse-video" width="640" height="480" controls autoplay>
+      <video id="timelapse-video" controls autoplay>
         Your browser does not support the video tag.
       </video>
       <div id="timelapse-grid" class="timelapse-grid">
