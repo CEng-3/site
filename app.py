@@ -677,8 +677,8 @@ def check_thresholds_and_notify():
     
     # Check if we need to send water notification
     if water_violations == 5 and not water_notification_sent:
-        subject = f"ALERT: pH is {water_level}%"
-        message = f"ALERT: The Water level is below the acceptable threshold.\nThreshold Range: {water_threshold}%\nCurrent water level: {water_level}%."
+        subject = f"ALERT: Water level is {water_level}%"
+        message = f"The Water level is below the acceptable threshold.\nThreshold Range: {water_threshold}%\nCurrent water level: {water_level}%\n\nWebsite:\nhttps://tustower.com."
         
         if send_notification_emails(subject, message):
             water_notification_sent = True
@@ -687,7 +687,7 @@ def check_thresholds_and_notify():
     # Check if we need to send pH notification
     if ph_violations == 5 and not ph_notification_sent:
         subject = f"ALERT: pH is {ph_value}"
-        message = f"Alert: The pH level has exceeded the acceptable range.\nThreshold Range: {ph_min} - {ph_max}\nCurrent pH: {ph_value}"
+        message = f"The pH level has exceeded the acceptable range.\nThreshold Range: {ph_min} - {ph_max}\nCurrent pH: {ph_value}\n\nWebsite:\nhttps://tustower.com"
         
         if send_notification_emails(subject, message):
             ph_notification_sent = True
