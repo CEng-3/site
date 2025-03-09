@@ -28,6 +28,29 @@
       width: 120px;
       height: 48px;
     }
+
+    /* Background image styling */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("{{ url_for('static', filename='background.jpg') }}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.15; /* Adjust transparency level as needed */
+      z-index: -1;
+    }
+
+    /* For mobile devices - adjust background position if needed */
+    @media (max-width: 768px) {
+      body::before {
+        background-position: center center;
+      }
+    }
     .close-button {
       font-size: 1.5rem;
       cursor: pointer;
