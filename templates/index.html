@@ -297,6 +297,69 @@
       padding-bottom: 0.5rem;
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
+
+    /* Email registration form styles */
+    .email-registration {
+      margin-top: 3rem;
+      padding: 1.5rem;
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 0.5rem;
+      text-align: center;
+    }
+
+    .email-registration h3 {
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+
+    .email-form {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .email-form input[type="email"] {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .email-form button {
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .email-form button:hover {
+      background-color: #0056b3;
+    }
+
+    .email-notification {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .email-notification.success {
+      color: #28a745;
+    }
+
+    .email-notification.error {
+      color: #dc3545;
+    }
+
+    /* Footer styles */
+    .site-footer {
+      margin-top: 3rem;
+      padding: 1rem 0;
+      text-align: center;
+      font-size: 0.9rem;
+      border-top: 1px solid #dee2e6;
+    }
   </style>
   
 </head>
@@ -385,6 +448,22 @@
         <!-- Timelapse videos will be dynamically populated here -->
       </div>
     </div>
+    <!-- Email Registration Section -->
+    <section class="email-registration">
+      <h3>Register for Threshold Alerts</h3>
+      <p>Get notified when water level or pH readings are outside normal ranges.</p>
+      <form class="email-form" id="email-registration-form">
+        <input type="email" id="notification-email" placeholder="Your email address" required>
+        <button type="submit">Subscribe</button>
+      </form>
+      <div id="email-notification" class="email-notification"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <p>Aeroponic Tower Garden - TUS Research Project</p>
+      <p>&copy; 2023 TUS. All rights reserved.</p>
+    </footer>
   </main>
   <script>
     // Simple tab switching with dynamic timelapse video loading
@@ -700,6 +779,57 @@
           phLabel.textContent = `${storedPHMin} - ${storedPHMax}`;
         }
       });
+
+      // Email Registration Form Handling
+      const emailForm = document.getElementById('email-registration-form');
+      const emailInput = document.getElementById('notification-email');
+      const emailNotification = document.getElementById('email-notification');
+
+      if (emailForm) {
+        emailForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const email = emailInput.value.trim();
+
+          if (!email) {
+            showEmailNotification('Please enter a valid email address', 'error');
+            return;
+          }
+
+          // Create form data for submission
+          const formData = new FormData();
+          formData.append('email', email);
+
+          // Submit the email registration
+          fetch('/register_email', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === 'success') {
+              showEmailNotification(data.message, 'success');
+              emailInput.value = ''; // Clear the input field
+            } else {
+              showEmailNotification(data.message, 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Error registering email:', error);
+            showEmailNotification('An error occurred. Please try again.', 'error');
+          });
+        });
+      }
+
+      function showEmailNotification(message, type) {
+        emailNotification.textContent = message;
+        emailNotification.className = `email-notification ${type}`;
+        emailNotification.style.display = 'block';
+
+        // Hide the notification after 5 seconds
+        setTimeout(() => {
+          emailNotification.style.display = 'none';
+        }, 5000);
+      }
     });
   </script>
 </body>

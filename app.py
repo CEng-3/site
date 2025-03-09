@@ -9,6 +9,9 @@ import random
 import socket
 import pickle
 import struct
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 from flask import Flask, Response, render_template, request, session, redirect, url_for, jsonify
 
@@ -114,7 +117,7 @@ def get_fallback_frame():
         print(f"Error loading fallback image: {e}")
     
     # Minimal valid JPEG if all else fails
-    return b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00\x01\x00\x01\x00\x00\xff\xdb\x00C\x00\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9=82<.342\xff\xdb\x00C\x01\t\t\t\x0c\x0b\x0c\x18\r\r\x182!\x1c!22222222222222222222222222222222222222222222222222\xff\xc0\x00\x11\x08\x00\x01\x00\x01\x03\x01"\x00\x02\x11\x01\x03\x11\x01\xff\xc4\x00\x1f\x00\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xc4\x00\xb5\x10\x00\x02\x01\x03\x03\x02\x04\x03\x05\x05\x04\x04\x00\x00\x01}\x01\x02\x03\x00\x04\x11\x05\x12!1A\x06\x13Qa\x07"q\x142\x81\x91\xa1\x08#B\xb1\xc1\x15R\xd1\xf0$3br\x82\t\n\x16\x17\x18\x19\x1a%&\'()*456789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz\x83\x84\x85\x86\x87\x88\x89\x8a\x92\x93\x94\x95\x96\x97\x98\x99\x9a\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xff\xc4\x00\x1f\x01\x00\x03\x01\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xc4\x00\xb5\x11\x00\x02\x01\x02\x04\x04\x03\x04\x07\x05\x04\x04\x00\x01\x02w\x00\x01\x02\x03\x11\x04\x05!1\x06\x12AQ\x07aq\x13"2\x81\x08\x14B\x91\xa1\xb1\xc1\t#3R\xf0\x15br\xd1\n\x16$4\xe1%\xf1\x17\x18\x19\x1a&\'()*56789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x92\x93\x94\x95\x96\x97\x98\x99\x9a\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xff\xda\x00\x0c\x03\x01\x00\x02\x11\x03\x11\x00?\x00\xfe\xfe(\xa2\x8a\x00\xff\xd9'
+    return b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00\x01\x00\x01\x00\x00\xff\xdb\x00C\x00\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9=82<.342\xff\xdb\x00C\x01\t\t\t\x0c\x0b\x0c\x18\r\r\x182!\x1c!22222222222222222222222222222222222222222222222222\xff\xc0\x00\x11\x08\x00\x01\x00\x01\x03\x01"\x00\x02\x11\x01\x03\x11\x01\xff\xc4\x00\x1f\x00\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xc4\x00\xb5\x10\x00\x02\x01\x03\x03\x02\x04\x03\x05\x05\x04\x04\x00\x00\x01}\x01\x02\x03\x00\x04\x11\x05\x12!1A\x06\x13Qa\x07"q\x142\x81\x91\xa1\x08#B\xb1\xc1\x15R\xd1\xf0$3br\x82\t\n\x16\x17\x18\x19\x1a%&\'()*456789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz\x83\x84\x85\x86\x87\x88\x89\x8a\x92\x93\x94\x95\x96\x97\x98\x99\x9a\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xff\xc4\x00\x1f\x01\x00\x03\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xc4\x00\xb5\x11\x00\x02\x01\x02\x04\x04\x03\x04\x07\x05\x04\x04\x00\x01\x02w\x00\x01\x02\x03\x11\x04\x05!1\x06\x12AQ\x07aq\x13"2\x81\x08\x14B\x91\xa1\xb1\xc1\t#3R\xf0\x15br\xd1\n\x16$4\xe1%\xf1\x17\x18\x19\x1a&\'()*56789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x92\x93\x94\x95\x96\x97\x98\x99\x9a\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xff\xda\x00\x0c\x03\x01\x00\x02\x11\x03\x11\x00?\x00\xfe\xfe(\xa2\x8a\x00\xff\xd9'
 
 def gen_frames():
     if camera_available and cv2_available and camera:
@@ -517,6 +520,243 @@ def initialize_latest_readings():
 def initial_readings():
     return jsonify(get_latest_readings())
 
+# Define the path for the emails CSV file
+emails_file = 'registered_emails.csv'
+
+# Violation tracking variables - update these
+water_violations = 0
+ph_violations = 0
+water_notification_sent = False  # Separate flag for water
+ph_notification_sent = False     # Separate flag for pH
+last_reset_time = datetime.datetime.now()
+
+# Initialize emails file if it doesn't exist
+def initialize_emails_file():
+    if not os.path.exists(emails_file):
+        with open(emails_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['email'])
+
+# Function to get all registered emails
+def get_registered_emails():
+    try:
+        emails = []
+        if os.path.exists(emails_file):
+            with open(emails_file, 'r') as f:
+                reader = csv.reader(f)
+                next(reader)  # Skip header row
+                for row in reader:
+                    if row and row[0].strip():  # Check if row exists and email is not empty
+                        emails.append(row[0])
+        return emails
+    except Exception as e:
+        print(f"Error reading emails: {e}")
+        return []
+
+# Function to add a new email
+def add_email(email):
+    try:
+        # Check if email already exists
+        emails = get_registered_emails()
+        if email in emails:
+            return False, "Email already registered"
+            
+        with open(emails_file, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([email])
+        return True, "Email registered successfully"
+    except Exception as e:
+        print(f"Error adding email: {e}")
+        return False, f"Error: {str(e)}"
+
+# Function to remove an email
+def remove_email(email):
+    try:
+        emails = get_registered_emails()
+        if email not in emails:
+            return False, "Email not found"
+            
+        # Read all emails
+        rows = []
+        with open(emails_file, 'r') as f:
+            reader = csv.reader(f)
+            rows = list(reader)
+        
+        # Write back all emails except the one to remove
+        with open(emails_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+            for row in rows:
+                if not row or row[0] != email:
+                    writer.writerow(row)
+        
+        return True, "Email removed successfully"
+    except Exception as e:
+        print(f"Error removing email: {e}")
+        return False, f"Error: {str(e)}"
+
+# Function to send notification emails
+def send_notification_emails(subject, message):
+    emails = get_registered_emails()
+    if not emails:
+        print("No registered emails to notify")
+        return False
+    
+    try:
+        # Email configuration - replace with your SMTP details
+        smtp_server = "smtp.gmail.com"  # Example for Gmail
+        smtp_port = 587
+        smtp_username = "tustower@gmail.com"  # Replace with your email
+        smtp_password = "btlh zeta osun kwxq"  # Replace with your app password (not your regular password)
+        
+        # Create connection
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        
+        # Send emails
+        for email in emails:
+            try:
+                # Create message
+                msg = MIMEMultipart()
+                msg['From'] = smtp_username
+                msg['To'] = email
+                msg['Subject'] = subject
+                
+                # Add body to email
+                msg.attach(MIMEText(message, 'plain'))
+                
+                # Send message
+                server.send_message(msg)
+                print(f"Notification sent to {email}")
+                
+            except Exception as e:
+                print(f"Error sending email to {email}: {e}")
+        
+        # Close the connection
+        server.quit()
+        return True
+    except Exception as e:
+        print(f"Failed to send notification emails: {e}")
+        traceback.print_exc()
+        return False
+
+# Function to check thresholds and track violations - update this function
+def check_thresholds_and_notify():
+    global water_violations, ph_violations, water_notification_sent, ph_notification_sent, last_reset_time
+    
+    # Get current readings
+    readings = get_latest_readings()
+    water_level = readings['water']
+    ph_value = readings['ph']
+    
+    # Get thresholds
+    thresholds = get_thresholds()
+    water_threshold = thresholds['water_level_threshold']
+    ph_min = thresholds['ph_min_threshold']
+    ph_max = thresholds['ph_max_threshold']
+    
+    # Check for water level violations
+    if water_level < water_threshold:
+        water_violations += 1
+        print(f"Water violation #{water_violations} detected: {water_level}% is below threshold {water_threshold}%")
+    else:
+        water_violations = 0
+        if water_notification_sent:
+            water_notification_sent = False
+            print("Water level returned to normal, water notification flag reset")
+    
+    # Check for pH violations
+    if ph_value < ph_min or ph_value > ph_max:
+        ph_violations += 1
+        print(f"pH violation #{ph_violations} detected: {ph_value} is outside range {ph_min}-{ph_max}")
+    else:
+        ph_violations = 0
+        if ph_notification_sent:
+            ph_notification_sent = False
+            print("pH level returned to normal, pH notification flag reset")
+    
+    # Check if we need to send water notification
+    if water_violations == 5 and not water_notification_sent:
+        subject = "Alert: Aeroponic Tower Water Level Violation"
+        message = f"Water level ({water_level}%) is below threshold ({water_threshold}%)."
+        
+        if send_notification_emails(subject, message):
+            water_notification_sent = True
+            print(f"Water notification emails sent at {datetime.datetime.now()} after exactly 5 consecutive violations")
+    
+    # Check if we need to send pH notification
+    if ph_violations == 5 and not ph_notification_sent:
+        subject = "Alert: Aeroponic Tower pH Level Violation"
+        message = f"pH level ({ph_value}) is outside the acceptable range ({ph_min}-{ph_max})."
+        
+        if send_notification_emails(subject, message):
+            ph_notification_sent = True
+            print(f"pH notification emails sent at {datetime.datetime.now()} after exactly 5 consecutive violations")
+    
+    # Reset violations and notification flags every 24 hours
+    now = datetime.datetime.now()
+    if (now - last_reset_time).days >= 1:
+        water_violations = 0
+        ph_violations = 0
+        water_notification_sent = False
+        ph_notification_sent = False
+        last_reset_time = now
+        print(f"Daily reset of violation counters at {now}")
+
+# Routes for email management
+@app.route('/register_email', methods=['POST'])
+def register_email():
+    try:
+        email = request.form.get('email')
+        if not email:
+            return jsonify({"status": "error", "message": "Email is required"}), 400
+            
+        success, message = add_email(email)
+        if success:
+            return jsonify({"status": "success", "message": message}), 200
+        else:
+            return jsonify({"status": "error", "message": message}), 400
+    except Exception as e:
+        print(f"Error registering email: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/get_emails')
+def get_emails():
+    if not session.get('authenticated'):
+        return jsonify({"status": "error", "message": "Not authenticated"}), 401
+        
+    emails = get_registered_emails()
+    return jsonify({"status": "success", "emails": emails}), 200
+
+@app.route('/remove_email', methods=['POST'])
+def remove_email_route():
+    if not session.get('authenticated'):
+        return jsonify({"status": "error", "message": "Not authenticated"}), 401
+        
+    try:
+        email = request.form.get('email')
+        if not email:
+            return jsonify({"status": "error", "message": "Email is required"}), 400
+            
+        success, message = remove_email(email)
+        if success:
+            return jsonify({"status": "success", "message": message}), 200
+        else:
+            return jsonify({"status": "error", "message": message}), 400
+    except Exception as e:
+        print(f"Error removing email: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# Function to periodically check thresholds and send notifications
+def threshold_monitor():
+    while True:
+        try:
+            check_thresholds_and_notify()
+        except Exception as e:
+            print(f"Error in threshold monitor: {e}")
+        
+        time.sleep(300)  # Check every minute - this is the delay between checks
+
 # Main Execution
 if __name__ == '__main__':
     print("Aeroponic Tower Garden Website Starting...")
@@ -542,9 +782,16 @@ if __name__ == '__main__':
     # Initialize latest readings file
     initialize_latest_readings()
     
+    # Initialize emails file
+    initialize_emails_file()
+    
     # Start the background sensor logger thread
     logger_thread = threading.Thread(target=background_sensor_logger, daemon=True)
     logger_thread.start()
+    
+    # Start the threshold monitor thread
+    threshold_thread = threading.Thread(target=threshold_monitor, daemon=True)
+    threshold_thread.start()
     
     try:
         # Start the Flask app
