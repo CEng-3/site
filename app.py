@@ -95,7 +95,7 @@ def get_ph_reading():
 def get_water_reading():
     if water_sensor_available:
         try:
-            _, cycle_low = record_water_cycle()
+            cycle_low = record_water_cycle()  # Now receives single value
             return int(cycle_low)
         except Exception as e:
             print(f"Error reading water level: {e}")
