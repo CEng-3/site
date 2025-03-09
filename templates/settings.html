@@ -450,6 +450,86 @@
         font-size: 0.9rem;
       }
     }
+
+    /* Email management styles */
+    .email-management {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 0.5rem;
+    }
+    
+    .email-management h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    
+    .email-list {
+      margin-top: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 0.25rem;
+      background-color: #fff;
+      width: 100%;
+    }
+    
+    .email-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid #eee;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .email-text {
+      flex-grow: 1;
+      margin-right: 1rem;
+      word-break: normal;
+      overflow-wrap: break-word;
+      align-self: center; /* Align vertically center */
+    }
+    
+    .remove-email {
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+      width: 150px; /* Fixed width */
+      height: 50px; /* Fixed height */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0; /* Prevent button from shrinking */
+      align-self: center; /* Align vertically center */
+    }
+    
+    .remove-email:hover {
+      background-color: #bd2130;
+    }
+    
+    .no-emails {
+      padding: 1rem;
+      text-align: center;
+      color: #6c757d;
+    }
+    
+    /* Dark mode styles for email management */
+    @media (prefers-color-scheme: dark) {
+      .email-list {
+        background-color: #333;
+        border-color: #555;
+      }
+      
+      .email-item {
+        border-bottom-color: #444;
+      }
+    }
   </style>
 </head>
 <body>
@@ -554,6 +634,16 @@
       </svg>
       <!-- Refill Tank button -->
       <button id="fillTankButton" class="btn-download"><i class="fas fa-tint"></i> Refill Tank</button>
+    </section>
+
+    <!-- Email Management Section -->
+    <section class="email-management">
+      <h2>Email Alert Management</h2>
+      <p>Manage email addresses registered to receive alerts for threshold violations.</p>
+      
+      <div class="email-list" id="email-list">
+        <div class="no-emails">Loading registered emails...</div>
+      </div>
     </section>
   </main>
 
@@ -751,6 +841,87 @@
       
       // Update gauge periodically
       setInterval(updateGauge, 10000);
+    });
+
+    // Email Management Functions
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load registered emails
+      loadRegisteredEmails();
+      
+      // Function to load registered emails
+      function loadRegisteredEmails() {
+        fetch('/get_emails')
+          .then(response => response.json())
+          .then(data => {
+            const emailListContainer = document.getElementById('email-list');
+            
+            if (data.status === 'success' && Array.isArray(data.emails)) {
+              if (data.emails.length > 0) {
+                // Display emails
+                emailListContainer.innerHTML = '';
+                data.emails.forEach(email => {
+                  const emailItem = document.createElement('div');
+                  emailItem.className = 'email-item';
+                  
+                  const emailText = document.createElement('div'); // Changed back to div for better block layout
+                  emailText.className = 'email-text';
+                  emailText.textContent = email;
+                  
+                  const removeButton = document.createElement('button');
+                  removeButton.className = 'remove-email';
+                  removeButton.textContent = 'Remove';
+                  removeButton.setAttribute('data-email', email);
+                  removeButton.addEventListener('click', function() {
+                    removeEmail(email);
+                  });
+                  
+                  emailItem.appendChild(emailText);
+                  emailItem.appendChild(removeButton);
+                  emailListContainer.appendChild(emailItem);
+                });
+              } else {
+                // No emails registered
+                emailListContainer.innerHTML = '<div class="no-emails">No emails registered for alerts.</div>';
+              }
+            } else {
+              // Error loading emails
+              emailListContainer.innerHTML = '<div class="no-emails">Error loading registered emails.</div>';
+            }
+          })
+          .catch(error => {
+            console.error('Error loading emails:', error);
+            const emailListContainer = document.getElementById('email-list');
+            emailListContainer.innerHTML = '<div class="no-emails">Error loading registered emails. Please try again.</div>';
+          });
+      }      
+      // Function to remove an email
+      function removeEmail(email) {
+        if (!confirm(`Are you sure you want to remove ${email}?`)) {
+          return;
+        }
+        
+        const formData = new FormData();
+        formData.append('email', email);
+        
+        fetch('/remove_email', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            // Success - just refresh the email list without showing an alert
+            loadRegisteredEmails();
+          } else {
+            // Still show error messages
+            alert('Error: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error removing email:', error);
+          alert('An error occurred while removing the email. Please try again.');
+        });
+      }
     });
   </script>
 </body>
