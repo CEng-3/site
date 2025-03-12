@@ -149,7 +149,7 @@ def gen_frames():
 def receive_frames():
     """Connect to Pi B and receive the camera feed."""
     PI_B_IP = "192.168.64.120"
-    PORT = 5001
+    PORT = 4050
     data = b""
     payload_size = struct.calcsize("Q")
 
