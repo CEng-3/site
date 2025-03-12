@@ -384,24 +384,13 @@
 </head>
 <body>
   
-  <header class="site-header">
-  <!-- Logo -->
-  <a href="#" class="logo">
-      <picture>
-        <source
-          srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}"
-          media="(prefers-color-scheme: dark)"
-        />
-        <source
-          srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
-          media="(prefers-color-scheme: light)"
-        />
-        <img
-          src="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
-          alt="TUS Logo"
-        />
-      </picture>
-    </a>
+  <a href="/#" class="logo">
+    <picture>
+      <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)" />
+      <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)" />
+      <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo" />
+    </picture>
+  </a>
 
     <!-- X button -->
     <a href="/" class="close-button" aria-label="Close">

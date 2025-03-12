@@ -151,23 +151,13 @@
   </style>
 </head>
 <body>
-  <header class="site-header">
-    <a href="#" class="logo">
-      <picture>
-        <source
-          srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}"
-          media="(prefers-color-scheme: dark)"
-        />
-        <source
-          srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
-          media="(prefers-color-scheme: light)"
-        />
-        <img
-          src="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
-          alt="TUS Logo"
-        />
-      </picture>
-    </a>
+  <a href="/#" class="logo">
+    <picture>
+      <source srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)" />
+      <source srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)" />
+      <img src="{{ url_for('static', filename='TUS-Logo-Black.png') }}" alt="TUS Logo" />
+    </picture>
+  </a>
     <!-- Close button -->
     <a href="javascript:history.back()" class="close-button" aria-label="Close">
       <i class="fas fa-times"></i>
