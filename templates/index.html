@@ -502,7 +502,46 @@
         align-items: center;
       }
     }
+    /* Date picker styling for timelapse */
+.date-picker-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+}
+
+.date-picker-container label {
+  font-weight: bold;
+}
+
+.date-picker {
+  padding: 0.5rem;
+  border: 2px solid #ccc;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  width: 150px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Flatpickr calendar z-index */
+.flatpickr-calendar {
+  z-index: 99999 !important;
+}
+
+.centered-popup {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+}
   </style>
+  <!-- Flatpickr CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <!-- Flatpickr - Dark theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css" media="(prefers-color-scheme: dark)" />
   
 </head>
 <body>
@@ -577,6 +616,12 @@
 <div id="timelapse" class="tab-content">
   <h2>Timelapse Recordings</h2>
 
+  <!-- Date picker section -->
+  <div class="date-picker-container">
+    <label for="timelapseDate">Select Date:</label>
+    <input type="text" id="timelapseDate" class="date-picker" placeholder="Pick a date">
+  </div>
+
   <!-- Two video players side by side -->
   <div class="timelapse-players">
     <div class="video-container">
@@ -591,16 +636,6 @@
         Your browser does not support the video tag.
       </video>
     </div>
-  </div>
-
-  <!-- Month selector -->
-  <div id="month-selector" class="month-selector">
-    <!-- Month options will be dynamically populated here -->
-  </div>
-
-  <!-- Date grid organized by month -->
-  <div id="date-grid" class="date-grid">
-    <!-- Dates will be dynamically populated here -->
   </div>
 </div>
     <!-- Email Registration Section -->
@@ -989,261 +1024,163 @@
     });
 
     // Timelapse related code
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize variables to store available videos
-      let availableVideos = {
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize variables to store available videos
+  let availableVideos = {
+    cam1: {},
+    cam2: {}
+  };
+  
+  // Initialize date picker
+  const timelapseDate = flatpickr('#timelapseDate', {
+    dateFormat: 'Y-m-d',
+    disableMobile: true,
+    maxDate: 'today',
+    onOpen: (selectedDates, dateStr, instance) => {
+      instance.calendarContainer.classList.add('centered-popup');
+    },
+    onClose: (selectedDates, dateStr, instance) => {
+      instance.calendarContainer.classList.remove('centered-popup');
+      if (dateStr) {
+        loadVideosForDate(dateStr);
+      }
+    },
+    onChange: (selectedDates, dateStr) => {
+      if (dateStr) {
+        loadVideosForDate(dateStr);
+      }
+    }
+  });
+  
+  // Function to extract date from filename
+  function extractDateFromFilename(filename) {
+    const dateMatch = filename.match(/timelapse_(\d{4}-\d{2}-\d{2})/);
+    if (dateMatch) {
+      return dateMatch[1];
+    }
+    return null;
+  }
+  
+  // Function to load videos for both cameras
+  async function loadTimelapseVideos() {
+    try {
+      // Fetch videos for cam1
+      const responseCam1 = await fetch('/timelapse_list?camera=cam1');
+      if (!responseCam1.ok) {
+        throw new Error(`HTTP error! status: ${responseCam1.status}`);
+      }
+      const videosCam1 = await responseCam1.json();
+      
+      // Fetch videos for cam2
+      const responseCam2 = await fetch('/timelapse_list?camera=cam2');
+      if (!responseCam2.ok) {
+        throw new Error(`HTTP error! status: ${responseCam2.status}`);
+      }
+      const videosCam2 = await responseCam2.json();
+      
+      // Organize videos by date for each camera
+      availableVideos = {
         cam1: {},
         cam2: {}
       };
-      let selectedMonth = '';
-      let selectedDate = '';
-
-      // Function to extract date from filename
-      function extractDateFromFilename(filename) {
-        const dateMatch = filename.match(/timelapse_(\d{4}-\d{2}-\d{2})/);
-        if (dateMatch) {
-          return dateMatch[1];
+      
+      videosCam1.forEach(video => {
+        const date = extractDateFromFilename(video);
+        if (date) {
+          if (!availableVideos.cam1[date]) {
+            availableVideos.cam1[date] = [];
+          }
+          availableVideos.cam1[date].push(video);
         }
-        return null;
-      }
-
-      // Function to extract month from date string
-      function extractMonthFromDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleString('default', { month: 'long', year: 'numeric' });
-      }
-
-      // Function to organize videos by month and date
-      function organizeVideosByMonthAndDate() {
-        const months = {};
-
-        // Process cam1 videos
-        Object.keys(availableVideos.cam1).forEach(date => {
-          const month = extractMonthFromDate(date);
-          if (!months[month]) {
-            months[month] = new Set();
-          }
-          months[month].add(date);
-        });
-
-        // Process cam2 videos to ensure we catch all dates
-        Object.keys(availableVideos.cam2).forEach(date => {
-          const month = extractMonthFromDate(date);
-          if (!months[month]) {
-            months[month] = new Set();
-          }
-          months[month].add(date);
-        });
-
-        // Convert sets to sorted arrays
-        const organizedMonths = {};
-        Object.keys(months).forEach(month => {
-          organizedMonths[month] = Array.from(months[month]).sort((a, b) => 
-            new Date(b) - new Date(a)
-          );
-        });
-
-        return organizedMonths;
-      }
-
-      // Function to load videos for both cameras
-      async function loadTimelapseVideos() {
-        try {
-          // Fetch videos for cam1
-          const responseCam1 = await fetch('/timelapse_list?camera=cam1');
-          if (!responseCam1.ok) {
-            throw new Error(`HTTP error! status: ${responseCam1.status}`);
-          }
-          const videosCam1 = await responseCam1.json();
-          
-          // Fetch videos for cam2
-          const responseCam2 = await fetch('/timelapse_list?camera=cam2');
-          if (!responseCam2.ok) {
-            throw new Error(`HTTP error! status: ${responseCam2.status}`);
-          }
-          const videosCam2 = await responseCam2.json();
-          
-          // Organize videos by date for each camera
-          availableVideos = {
-            cam1: {},
-            cam2: {}
-          };
-          
-          videosCam1.forEach(video => {
-            const date = extractDateFromFilename(video);
-            if (date) {
-              if (!availableVideos.cam1[date]) {
-                availableVideos.cam1[date] = [];
-              }
-              availableVideos.cam1[date].push(video);
-            }
-          });
-          
-          videosCam2.forEach(video => {
-            const date = extractDateFromFilename(video);
-            if (date) {
-              if (!availableVideos.cam2[date]) {
-                availableVideos.cam2[date] = [];
-              }
-              availableVideos.cam2[date].push(video);
-            }
-          });
-          
-          // Populate month selector and date grid
-          updateMonthSelector();
-          
-        } catch (error) {
-          console.error('Error loading timelapse videos:', error);
-        }
-      }
-
-      // Function to update the month selector
-      function updateMonthSelector() {
-        const organizedMonths = organizeVideosByMonthAndDate();
-        const monthSelector = document.getElementById('month-selector');
-        monthSelector.innerHTML = '';
-        
-        // Sort months chronologically (newest first)
-        const sortedMonths = Object.keys(organizedMonths).sort((a, b) => {
-          const monthYearA = a.split(' ');
-          const monthYearB = b.split(' ');
-          const yearA = parseInt(monthYearA[1]);
-          const yearB = parseInt(monthYearB[1]);
-          
-          if (yearA !== yearB) {
-            return yearB - yearA;
-          }
-          
-          const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                              'July', 'August', 'September', 'October', 'November', 'December'];
-          return monthNames.indexOf(monthYearB[0]) - monthNames.indexOf(monthYearA[0]);
-        });
-        
-        sortedMonths.forEach(month => {
-          const monthButton = document.createElement('button');
-          monthButton.textContent = month;
-          monthButton.classList.add('month-btn');
-          
-          // Select first month by default
-          if (!selectedMonth) {
-            selectedMonth = month;
-            monthButton.classList.add('active');
-          } else if (month === selectedMonth) {
-            monthButton.classList.add('active');
-          }
-          
-          monthButton.addEventListener('click', () => {
-            document.querySelectorAll('.month-btn').forEach(btn => {
-              btn.classList.remove('active');
-            });
-            monthButton.classList.add('active');
-            selectedMonth = month;
-            updateDateGrid(organizedMonths[month]);
-          });
-          
-          monthSelector.appendChild(monthButton);
-        });
-        
-        // Update the date grid with the selected month
-        if (selectedMonth && organizedMonths[selectedMonth]) {
-          updateDateGrid(organizedMonths[selectedMonth]);
-        }
-      }
-
-      // Function to update the date grid
-      function updateDateGrid(dates) {
-        const dateGrid = document.getElementById('date-grid');
-        dateGrid.innerHTML = '';
-        
-        dates.forEach(date => {
-          const dateButton = document.createElement('button');
-          // Format the date to DD-MM-YYYY
-          const formattedDate = new Date(date).toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          });
-          
-          dateButton.textContent = formattedDate;
-          dateButton.classList.add('date-btn');
-          
-          // Select first date by default
-          if (!selectedDate) {
-            selectedDate = date;
-            dateButton.classList.add('active');
-            loadVideosForDate(date);
-          } else if (date === selectedDate) {
-            dateButton.classList.add('active');
-          }
-          
-          dateButton.addEventListener('click', () => {
-            document.querySelectorAll('.date-btn').forEach(btn => {
-              btn.classList.remove('active');
-            });
-            dateButton.classList.add('active');
-            selectedDate = date;
-            loadVideosForDate(date);
-          });
-          
-          dateGrid.appendChild(dateButton);
-        });
-        
-        // If we have dates but no selection, select the first one
-        if (dates.length > 0 && !selectedDate) {
-          selectedDate = dates[0];
-          loadVideosForDate(selectedDate);
-        }
-      }
-
-      // Function to load videos for a specific date
-      function loadVideosForDate(date) {
-        const video1 = document.getElementById('timelapse-video-cam1');
-        const video2 = document.getElementById('timelapse-video-cam2');
-        
-        // Common video name format
-        const videoName = `timelapse_${date}.mp4`;
-        const timestamp = new Date().getTime(); // cache busting
-        
-        // Set source for video 1 (Towergarden)
-        video1.innerHTML = '';
-        if (availableVideos.cam1[date] && availableVideos.cam1[date].length > 0) {
-          const source1 = document.createElement('source');
-          source1.src = `/static/cam1/${videoName}?t=${timestamp}`;
-          source1.type = 'video/mp4';
-          video1.appendChild(source1);
-          video1.load();
-        } else {
-          video1.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
-        }
-        
-        // Set source for video 2 (Kitchen)
-        video2.innerHTML = '';
-        if (availableVideos.cam2[date] && availableVideos.cam2[date].length > 0) {
-          const source2 = document.createElement('source');
-          source2.src = `/static/cam2/${videoName}?t=${timestamp}`;
-          source2.type = 'video/mp4';
-          video2.appendChild(source2);
-          video2.load();
-        } else {
-          video2.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
-        }
-      }
-
-      // Load videos when the timelapse tab is activated
-      document.querySelectorAll('.tabs a').forEach((tab) => {
-        tab.addEventListener('click', (e) => {
-          if (tab.getAttribute('href') === "#timelapse") {
-            loadTimelapseVideos();
-          }
-        });
       });
+      
+      videosCam2.forEach(video => {
+        const date = extractDateFromFilename(video);
+        if (date) {
+          if (!availableVideos.cam2[date]) {
+            availableVideos.cam2[date] = [];
+          }
+          availableVideos.cam2[date].push(video);
+        }
+      });
+      
+      // Get all available dates from both cameras
+      const allDates = new Set();
+      Object.keys(availableVideos.cam1).forEach(date => allDates.add(date));
+      Object.keys(availableVideos.cam2).forEach(date => allDates.add(date));
+      
+      // Convert to array and sort (newest first)
+      const sortedDates = Array.from(allDates).sort((a, b) => 
+        new Date(b) - new Date(a)
+      );
+      
+      // Set available dates for the date picker
+      if (sortedDates.length > 0) {
+        timelapseDate.set("enable", sortedDates);
+        
+        // Set the most recent date and load its videos
+        timelapseDate.setDate(sortedDates[0]);
+        loadVideosForDate(sortedDates[0]);
+      } else {
+        console.log("No timelapse videos available");
+      }
+      
+    } catch (error) {
+      console.error('Error loading timelapse videos:', error);
+    }
+  }
 
-      // If timelapse tab is active on page load, load the videos
-      if (document.querySelector('.tabs a[href="#timelapse"]').classList.contains('active')) {
+  // Function to load videos for a specific date
+  function loadVideosForDate(date) {
+    const video1 = document.getElementById('timelapse-video-cam1');
+    const video2 = document.getElementById('timelapse-video-cam2');
+    
+    // Common video name format
+    const videoName = `timelapse_${date}.mp4`;
+    const timestamp = new Date().getTime(); // cache busting
+    
+    // Set source for video 1 (Towergarden)
+    video1.innerHTML = '';
+    if (availableVideos.cam1[date] && availableVideos.cam1[date].length > 0) {
+      const source1 = document.createElement('source');
+      source1.src = `/static/cam1/${videoName}?t=${timestamp}`;
+      source1.type = 'video/mp4';
+      video1.appendChild(source1);
+      video1.load();
+    } else {
+      video1.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
+    }
+    
+    // Set source for video 2 (Kitchen)
+    video2.innerHTML = '';
+    if (availableVideos.cam2[date] && availableVideos.cam2[date].length > 0) {
+      const source2 = document.createElement('source');
+      source2.src = `/static/cam2/${videoName}?t=${timestamp}`;
+      source2.type = 'video/mp4';
+      video2.appendChild(source2);
+      video2.load();
+    } else {
+      video2.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
+    }
+  }
+
+  // Load videos when the timelapse tab is activated
+  document.querySelectorAll('.tabs a').forEach((tab) => {
+    tab.addEventListener('click', (e) => {
+      if (tab.getAttribute('href') === "#timelapse") {
         loadTimelapseVideos();
       }
     });
+  });
+
+  // If timelapse tab is active on page load, load the videos
+  if (document.querySelector('.tabs a[href="#timelapse"]').classList.contains('active')) {
+    loadTimelapseVideos();
+  }
+});
   </script>
+  <!-- Flatpickr JS -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js"></script>
 </body>
 
 </html>
