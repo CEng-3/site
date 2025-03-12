@@ -1158,185 +1158,145 @@ document.addEventListener('DOMContentLoaded', function() {
     const timestamp = new Date().getTime(); // cache busting
     
     // First, pause any currently playing videos
-    if (!video1.paused) video1.pause();
-    if (!video2.paused) video2.pause();
+    if (video1 && !video1.paused) video1.pause();
+    if (video2 && !video2.paused) video2.pause();
     
-    // Show loading indicator
-    video1.innerHTML = '<p class="video-loading">Loading video...</p>';
-    video2.innerHTML = '<p class="video-loading">Loading video...</p>';
+    // Show loading indicator for video 1
+    const container1 = document.querySelector('.video-container:first-child');
+    container1.innerHTML = `
+      <h3>Towergarden</h3>
+      <div id="timelapse-video-cam1" class="timelapse-video">
+        <p class="video-loading">Loading video...</p>
+      </div>
+    `;
     
-    // Set source for video 1 (Towergarden)
-    loadVideo(video1, `/static/cam1/${videoName}?t=${timestamp}`, "Towergarden");
+    // Show loading indicator for video 2
+    const container2 = document.querySelector('.video-container:last-child');
+    container2.innerHTML = `
+      <h3>Kitchen</h3>
+      <div id="timelapse-video-cam2" class="timelapse-video">
+        <p class="video-loading">Loading video...</p>
+      </div>
+    `;
     
-    // Set source for video 2 (Kitchen)
-    loadVideo(video2, `/static/cam2/${videoName}?t=${timestamp}`, "Kitchen");
+    // Create new video elements
+    const newVideo1 = document.createElement('video');
+    newVideo1.className = 'timelapse-video';
+    newVideo1.controls = true;
+    newVideo1.id = 'timelapse-video-cam1';
     
-    // After videos are loaded, set up synchronization
-    // We'll do this in the loadVideo function after both are loaded
-  }
-
-  // Helper function to load a video with proper error handling
-  function loadVideo(videoElement, src, cameraName) {
-    // Create a new video element
-    const newVideo = document.createElement('video');
-    newVideo.className = 'timelapse-video';
-    newVideo.controls = true;
+    const newVideo2 = document.createElement('video');
+    newVideo2.className = 'timelapse-video';
+    newVideo2.controls = true;
+    newVideo2.id = 'timelapse-video-cam2';
     
-    // Set up error handling
-    newVideo.onerror = function() {
-      videoElement.innerHTML = `<p class="video-unavailable">No video available for this date</p>`;
-      checkSyncReady();
+    // Track loading state
+    let video1Loaded = false;
+    let video2Loaded = false;
+    
+    // Create source elements
+    const source1 = document.createElement('source');
+    source1.src = `/static/cam1/${videoName}?t=${timestamp}`;
+    source1.type = 'video/mp4';
+    
+    const source2 = document.createElement('source');
+    source2.src = `/static/cam2/${videoName}?t=${timestamp}`;
+    source2.type = 'video/mp4';
+    
+    // Handle video 1 loading
+    newVideo1.onloadeddata = function() {
+      video1Loaded = true;
+      container1.innerHTML = '';
+      container1.appendChild(document.createElement('h3')).textContent = 'Towergarden';
+      container1.appendChild(newVideo1);
+      checkBothVideosLoaded();
     };
     
-    // Set up load event
-    newVideo.onloadeddata = function() {
-      // Replace the old video element with the new one
-      videoElement.parentNode.replaceChild(newVideo, videoElement);
-      checkSyncReady();
+    // Handle video 2 loading
+    newVideo2.onloadeddata = function() {
+      video2Loaded = true;
+      container2.innerHTML = '';
+      container2.appendChild(document.createElement('h3')).textContent = 'Kitchen';
+      container2.appendChild(newVideo2);
+      checkBothVideosLoaded();
     };
     
-    // Add a timeout in case the video takes too long to load
-    const timeout = setTimeout(() => {
-      if (!newVideo.readyState) {
-        newVideo.onerror();
-        console.warn(`Video load timeout for ${cameraName}`);
+    // Handle video 1 error
+    newVideo1.onerror = function() {
+      video1Loaded = true;
+      container1.innerHTML = '';
+      container1.appendChild(document.createElement('h3')).textContent = 'Towergarden';
+      container1.innerHTML += '<p class="video-unavailable">No video available for this date</p>';
+      checkBothVideosLoaded();
+    };
+    
+    // Handle video 2 error
+    newVideo2.onerror = function() {
+      video2Loaded = true;
+      container2.innerHTML = '';
+      container2.appendChild(document.createElement('h3')).textContent = 'Kitchen';
+      container2.innerHTML += '<p class="video-unavailable">No video available for this date</p>';
+      checkBothVideosLoaded();
+    };
+    
+    // Add timeout for each video
+    setTimeout(() => {
+      if (!video1Loaded) {
+        newVideo1.onerror();
       }
-    }, 5000); // 5 second timeout
+    }, 10000);
     
-    // Set source and start loading
-    const sourceElement = document.createElement('source');
-    sourceElement.src = src;
-    sourceElement.type = 'video/mp4';
-    newVideo.appendChild(sourceElement);
-    newVideo.load();
+    setTimeout(() => {
+      if (!video2Loaded) {
+        newVideo2.onerror();
+      }
+    }, 10000);
     
-    // Keep track of which videos are loaded for sync
-    if (!window.videosLoaded) {
-      window.videosLoaded = { cam1: false, cam2: false };
+    // Function to check if both videos are loaded and set up synchronization
+    function checkBothVideosLoaded() {
+      if (video1Loaded && video2Loaded) {
+        const actualVideo1 = document.getElementById('timelapse-video-cam1');
+        const actualVideo2 = document.getElementById('timelapse-video-cam2');
+        
+        if (actualVideo1 && actualVideo2 && 
+            actualVideo1.tagName === 'VIDEO' && 
+            actualVideo2.tagName === 'VIDEO') {
+          
+          // Set up synchronization between videos
+          actualVideo1.onplay = function() {
+            if (actualVideo2.paused) actualVideo2.play().catch(e => console.log('Cannot play video 2'));
+          };
+          
+          actualVideo2.onplay = function() {
+            if (actualVideo1.paused) actualVideo1.play().catch(e => console.log('Cannot play video 1'));
+          };
+          
+          actualVideo1.onpause = function() {
+            if (!actualVideo2.paused) actualVideo2.pause();
+          };
+          
+          actualVideo2.onpause = function() {
+            if (!actualVideo1.paused) actualVideo1.pause();
+          };
+          
+          actualVideo1.onseeking = function() {
+            actualVideo2.currentTime = actualVideo1.currentTime;
+          };
+          
+          actualVideo2.onseeking = function() {
+            actualVideo1.currentTime = actualVideo2.currentTime;
+          };
+          
+          console.log('Videos synchronized successfully');
+        }
+      }
     }
-    window.videosLoaded[cameraName === 'Towergarden' ? 'cam1' : 'cam2'] = false;
     
-    // Function to check if both videos are ready for sync
-    function checkSyncReady() {
-      clearTimeout(timeout); // Clear the timeout when the video loads or errors
-      
-      window.videosLoaded[cameraName === 'Towergarden' ? 'cam1' : 'cam2'] = true;
-      
-      // If both videos are loaded or have errored out, set up sync
-      if (window.videosLoaded.cam1 && window.videosLoaded.cam2) {
-        setupVideoSync(
-          document.getElementById('timelapse-video-cam1'), 
-          document.getElementById('timelapse-video-cam2')
-        );
-      }
-    }
-  }
-
-  // Function to synchronize video players
-  function setupVideoSync(video1, video2) {
-    // Only try to sync if both are actual video elements (not error messages)
-    if (!video1 || !video2 || 
-        video1.tagName !== 'VIDEO' || 
-        video2.tagName !== 'VIDEO') {
-      return;
-    }
-    
-    // Clear any existing event listeners
-    video1.onplay = null;
-    video1.onpause = null;
-    video1.onseeking = null;
-    video1.onvolumechange = null;
-    
-    video2.onplay = null;
-    video2.onpause = null;
-    video2.onseeking = null;
-    video2.onvolumechange = null;
-    
-    // Synchronize play events
-    video1.onplay = function() {
-      try {
-        if (video2.paused) video2.play().catch(err => console.warn('Cannot play second video:', err));
-      } catch (e) {
-        console.warn('Error synchronizing play:', e);
-      }
-    };
-    
-    video2.onplay = function() {
-      try {
-        if (video1.paused) video1.play().catch(err => console.warn('Cannot play first video:', err));
-      } catch (e) {
-        console.warn('Error synchronizing play:', e);
-      }
-    };
-    
-    // Synchronize pause events
-    video1.onpause = function() {
-      try {
-        if (!video2.paused) video2.pause();
-      } catch (e) {
-        console.warn('Error synchronizing pause:', e);
-      }
-    };
-    
-    video2.onpause = function() {
-      try {
-        if (!video1.paused) video1.pause();
-      } catch (e) {
-        console.warn('Error synchronizing pause:', e);
-      }
-    };
-    
-    // Synchronize seeking (time position)
-    video1.onseeking = function() {
-      try {
-        video2.currentTime = video1.currentTime;
-      } catch (e) {
-        console.warn('Error synchronizing seeking:', e);
-      }
-    };
-    
-    video2.onseeking = function() {
-      try {
-        video1.currentTime = video2.currentTime;
-      } catch (e) {
-        console.warn('Error synchronizing seeking:', e);
-      }
-    };
-    
-    // Optional: Synchronize volume changes
-    video1.onvolumechange = function() {
-      try {
-        video2.volume = video1.volume;
-        video2.muted = video1.muted;
-      } catch (e) {
-        console.warn('Error synchronizing volume:', e);
-      }
-    };
-    
-    video2.onvolumechange = function() {
-      try {
-        video1.volume = video2.volume;
-        video1.muted = video2.muted;
-      } catch (e) {
-        console.warn('Error synchronizing volume:', e);
-      }
-    };
-    
-    console.log('Video synchronization set up successfully');
-  }
-
-  // Load videos when the timelapse tab is activated
-  document.querySelectorAll('.tabs a').forEach((tab) => {
-    tab.addEventListener('click', (e) => {
-      if (tab.getAttribute('href') === "#timelapse") {
-        loadTimelapseVideos();
-      }
-    });
-  });
-
-  // If timelapse tab is active on page load, load the videos
-  if (document.querySelector('.tabs a[href="#timelapse"]').classList.contains('active')) {
-    loadTimelapseVideos();
+    // Start loading videos
+    newVideo1.appendChild(source1);
+    newVideo2.appendChild(source2);
+    newVideo1.load();
+    newVideo2.load();
   }
 });
   </script>
