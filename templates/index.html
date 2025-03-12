@@ -476,11 +476,11 @@
       <h2>Live Camera Feed</h2>
 <div class="camera-grid">
   <div class="camera-feed">
-    <h3>Pi A Camera</h3>
+    <h3>Towergarden</h3>
     <img src="{{ url_for('video_feed') }}" width="640" height="480" />
   </div>
   <div class="camera-feed">
-    <h3>Pi B Camera</h3>
+    <h3>Kitchen</h3>
     <img src="{{ url_for('video_feed_pi_b') }}" width="640" height="480" onerror="this.onerror=null; this.src='/static/camera_fallback.jpg';" />
   </div>
 </div>
@@ -492,8 +492,8 @@
 
       <!-- Camera Selection Buttons -->
       <div class="camera-selector">
-        <button class="camera-btn active" data-camera="cam1">Camera 1</button>
-        <button class="camera-btn" data-camera="cam2">Camera 2</button>
+        <button class="camera-btn active" data-camera="cam1">Towergarden</button>
+        <button class="camera-btn" data-camera="cam2">Kitchen</button>
       </div>
 
       <video id="timelapse-video" controls autoplay>
