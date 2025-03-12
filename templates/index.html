@@ -1162,6 +1162,63 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       video2.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
     }
+
+    // Add synchronization for play/pause/seeking between videos
+    setupVideoSync(video1, video2);
+  }
+
+  // Function to synchronize video players
+  function setupVideoSync(video1, video2) {
+    if (!video1 || !video2) return;
+    
+    // Clear any existing event listeners
+    video1.onplay = null;
+    video1.onpause = null;
+    video1.onseeking = null;
+    video1.onvolumechange = null;
+    
+    video2.onplay = null;
+    video2.onpause = null;
+    video2.onseeking = null;
+    video2.onvolumechange = null;
+    
+    // Synchronize play events
+    video1.onplay = function() {
+      if (video2.paused) video2.play();
+    };
+    
+    video2.onplay = function() {
+      if (video1.paused) video1.play();
+    };
+    
+    // Synchronize pause events
+    video1.onpause = function() {
+      if (!video2.paused) video2.pause();
+    };
+    
+    video2.onpause = function() {
+      if (!video1.paused) video1.pause();
+    };
+    
+    // Synchronize seeking (time position)
+    video1.onseeking = function() {
+      video2.currentTime = video1.currentTime;
+    };
+    
+    video2.onseeking = function() {
+      video1.currentTime = video2.currentTime;
+    };
+    
+    // Optional: Synchronize volume changes
+    video1.onvolumechange = function() {
+      video2.volume = video1.volume;
+      video2.muted = video1.muted;
+    };
+    
+    video2.onvolumechange = function() {
+      video1.volume = video2.volume;
+      video1.muted = video2.muted;
+    };
   }
 
   // Load videos when the timelapse tab is activated
