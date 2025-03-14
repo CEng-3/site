@@ -682,26 +682,235 @@
       });
     });
 
+    // Move these variables to global scope for easier access in update functions
+    const totalArcLength = 160.57; // common arc length for both gauges
+    let lowWaterThreshold = 20;  // default threshold
+    let minPH = 6.0, maxPH = 7.5;  // default pH range
+    
+    // Initialize gauge elements globally so they can be accessed from anywhere
+    let waterGauge, waterProgressPath, waterLabel;
+    let phGauge, phProgressPath, phLabel;
+    let notificationBar;
+
+    // Function to get a color based on pH value
+    function getPHColor(ph) {
+      if (ph < 4) return "#FF0000";
+      else if (ph < 7) return "#FFA500";
+      else if (Math.abs(ph - 7) < 0.1) return "#00FF00";
+      else if (ph < 10) return "#0000FF";
+      else return "#800080";
+    }
+
+    // Update pH gauge - moved outside DOMContentLoaded for clarity
+    async function updatePH() {
+      try {
+        console.log("Fetching pH data...");
+        const startTime = performance.now();
+        
+        // Add a small visual indicator that data is being refreshed
+        if (phLabel) phLabel.classList.add('refreshing');
+        
+        const response = await fetch('/ph_data');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        let phValue = data.ph;
+        
+        console.log(`Received pH value: ${phValue}`);
+        
+        // Store the last valid pH value
+        if (!window.lastValidPH) {
+          window.lastValidPH = 7.0; // Default neutral pH
+        }
+        
+        // Check if pH is negative or above 14, use last valid value if it is
+        if (phValue < 0 || phValue > 14) {
+          console.warn(`Received invalid pH value (${phValue}), using last valid value instead`);
+          phValue = window.lastValidPH;
+        } else {
+          // Update the last valid pH value
+          window.lastValidPH = phValue;
+        }
+        
+        // Update DOM elements if they exist
+        if (phProgressPath && phLabel) {
+          const phOffset = totalArcLength - (phValue / 14) * totalArcLength;
+          phProgressPath.style.strokeDashoffset = phOffset.toFixed(2);
+          phLabel.textContent = phValue.toFixed(1);
+          const phColor = getPHColor(phValue);
+          phProgressPath.style.stroke = phColor;
+          phLabel.style.fill = phColor;
+          
+          // Remove the refreshing indicator
+          phLabel.classList.remove('refreshing');
+          
+          console.log(`Updated pH display to ${phValue.toFixed(1)}`);
+        } else {
+          console.warn("pH gauge elements not initialized yet");
+        }
+        
+        // Update notification bar if needed
+        updateNotificationBar();
+        
+        const endTime = performance.now();
+        console.log(`pH update completed in ${(endTime - startTime).toFixed(2)}ms`);
+      } catch (error) {
+        console.error('Error fetching pH data:', error);
+        // Remove the refreshing indicator on error
+        if (phLabel) phLabel.classList.remove('refreshing');
+      }
+    }
+
+    // Update water gauge - moved outside DOMContentLoaded for clarity
+    async function updateWaterLevel() {
+      try {
+        console.log("Fetching water level data...");
+        const startTime = performance.now();
+        
+        // Add a small visual indicator that data is being refreshed
+        if (waterLabel) waterLabel.classList.add('refreshing');
+        
+        const response = await fetch('/water_data');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const sensorPercentage = parseFloat(data.water);
+        
+        console.log(`Received water level: ${sensorPercentage}%`);
+        
+        // Update DOM elements if they exist
+        if (waterProgressPath && waterLabel) {
+          const waterOffset = totalArcLength - (sensorPercentage / 100) * totalArcLength;
+          waterProgressPath.style.strokeDashoffset = waterOffset.toFixed(2);
+          waterLabel.textContent = Math.round(sensorPercentage) + '%';
+          
+          // Remove the refreshing indicator
+          waterLabel.classList.remove('refreshing');
+          
+          // Update last refresh timestamp
+          const now = new Date();
+          document.getElementById('water-last-updated').textContent = 
+            `Last updated: ${now.toLocaleTimeString()}`;
+          
+          console.log(`Updated water level display to ${Math.round(sensorPercentage)}%`);
+        } else {
+          console.warn("Water gauge elements not initialized yet");
+        }
+        
+        // Update notification bar if needed
+        updateNotificationBar();
+        
+        const endTime = performance.now();
+        console.log(`Water update completed in ${(endTime - startTime).toFixed(2)}ms`);
+      } catch (error) {
+        console.error('Error fetching water data:', error);
+        // Remove the refreshing indicator on error
+        if (waterLabel) waterLabel.classList.remove('refreshing');
+      }
+    }
+
+    // Function to update notification bar based on current values
+    function updateNotificationBar() {
+      if (!waterLabel || !phLabel || !notificationBar) {
+        console.warn("Elements for notification bar not initialized yet");
+        return;
+      }
+      
+      // Parse current values from the display
+      const waterValue = parseFloat(waterLabel.textContent);
+      const pHValue = parseFloat(phLabel.textContent);
+      
+      if (waterValue < lowWaterThreshold || pHValue < minPH || pHValue > maxPH) {
+        notificationBar.style.display = 'block';
+        let message = '';
+        if (waterValue < lowWaterThreshold && (pHValue < minPH || pHValue > maxPH)) {
+          message = 'Warning: Low water level and pH out of range!';
+        } else if (waterValue < lowWaterThreshold) {
+          message = 'Warning: Low water level!';
+        } else {
+          message = 'Warning: pH out of range!';
+        }
+        notificationBar.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+      } else {
+        notificationBar.style.display = 'none';
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-      const totalArcLength = 160.57; // common arc length for both gauges
-      let lowWaterThreshold = 20;  // default threshold
-      let minPH = 6.0, maxPH = 7.5;  // default pH range
+      console.log("DOM loaded, initializing gauge elements...");
+      
+      // Initialize gauge elements
+      waterGauge = document.querySelector('.arc-gauge:not(.arc-gauge-ph)');
+      waterProgressPath = waterGauge.querySelector('.progress');
+      waterLabel = waterGauge.querySelector('.percentage');
+      
+      phGauge = document.querySelector('.arc-gauge-ph');
+      phProgressPath = phGauge.querySelector('.progress');
+      phLabel = phGauge.querySelector('.percentage');
+      
+      notificationBar = document.getElementById('notification-bar');
+      
+      console.log("Gauge elements initialized successfully");
 
-      // --- Water Level Gauge Elements ---
-      const waterGauge = document.querySelector('.arc-gauge:not(.arc-gauge-ph)');
-      const waterProgressPath = waterGauge.querySelector('.progress');
-      const waterLabel = waterGauge.querySelector('.percentage');
+      // Add timestamp elements for water level updates - removed countdown
+      const waterGaugeContainer = waterGauge.parentElement;
+      const waterUpdateInfo = document.createElement('div');
+      waterUpdateInfo.className = 'update-info';
+      waterUpdateInfo.innerHTML = `
+        <small id="water-last-updated">Last updated: Loading...</small>
+      `;
+      
+      // Insert after the water gauge
+      waterGaugeContainer.insertBefore(waterUpdateInfo, waterGauge.nextSibling);
+      
+      // CSS for visual update indicator and the new timestamp elements
+      const style = document.createElement('style');
+      style.textContent = `
+        .percentage.refreshing {
+          opacity: 0.7;
+          animation: pulse 0.5s infinite alternate;
+        }
+        @keyframes pulse {
+          0% { opacity: 0.7; }
+          100% { opacity: 1; }
+        }
+        
+        .update-info {
+          text-align: center;
+          font-size: 0.8rem;
+          margin-top: -0.5rem;
+          margin-bottom: 1.5rem;
+          opacity: 0.7;
+        }
+      `;
+      document.head.appendChild(style);
 
-      // --- pH Gauge Elements ---
-      const phGauge = document.querySelector('.arc-gauge-ph');
-      const phProgressPath = phGauge.querySelector('.progress');
-      const phLabel = phGauge.querySelector('.percentage');
+      // CSS for visual update indicator
+      const style = document.createElement('style');
+      style.textContent = `
+        .percentage.refreshing {
+          opacity: 0.7;
+          animation: pulse 0.5s infinite alternate;
+        }
+        @keyframes pulse {
+          0% { opacity: 0.7; }
+          100% { opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
 
       // Load initial readings from the CSV file when page loads
       async function loadInitialReadings() {
         try {
+          console.log("Loading initial readings...");
           const response = await fetch('/initial_readings');
           const data = await response.json();
+          
+          console.log("Initial readings received:", data);
           
           // Update pH gauge
           const phValue = data.ph;
@@ -720,6 +929,8 @@
           
           // Update notification bar with initial values
           updateNotificationBar();
+          
+          console.log("Initial readings loaded successfully");
         } catch (error) {
           console.error('Error fetching initial readings:', error);
         }
@@ -733,6 +944,8 @@
         fetch('/get_thresholds')
           .then(response => response.json())
           .then(data => {
+            console.log("Threshold values received:", data);
+            
             // Update threshold values
             lowWaterThreshold = data.water_level_threshold;
             minPH = data.ph_min_threshold;
@@ -749,188 +962,22 @@
 
       // Check for new thresholds periodically
       setInterval(loadThresholds, 30000); // Check every 30 seconds
-
-      // Function to get a color based on pH value
-      function getPHColor(ph) {
-        if (ph < 4) return "#FF0000";
-        else if (ph < 7) return "#FFA500";
-        else if (Math.abs(ph - 7) < 0.1) return "#00FF00";
-        else if (ph < 10) return "#0000FF";
-        else return "#800080";
-      }
-
-      setInterval(updateNotificationBar, 5000);
-      updateNotificationBar();
-
-      // Update pH gauge by fetching /ph_data every 5 seconds
-      async function updatePH() {
-        try {
-          const response = await fetch('/ph_data');
-          const data = await response.json();
-          let phValue = data.ph;
-          
-          // Store the last valid pH value
-          if (!window.lastValidPH) {
-            window.lastValidPH = 7.0; // Default neutral pH
-          }
-          
-          // Check if pH is negative or above 14, use last valid value if it is
-          if (phValue < 0 || phValue > 14) {
-            console.warn('Received invalid pH value (' + phValue + '), using last valid value instead');
-            phValue = window.lastValidPH;
-          } else {
-            // Update the last valid pH value
-            window.lastValidPH = phValue;
-          }
-          
-          const phOffset = totalArcLength - (phValue / 14) * totalArcLength;
-          phProgressPath.style.strokeDashoffset = phOffset.toFixed(2);
-          phLabel.textContent = phValue.toFixed(1);
-          const phColor = getPHColor(phValue);
-          phProgressPath.style.stroke = phColor;
-          phLabel.style.fill = phColor;
-        } catch (error) {
-          console.error('Error fetching pH data:', error);
-        }
-      }
-      setInterval(updatePH, 5000);
+      
+      console.log("Setting up continuous data polling...");
+      
+      // Start updating pH every 5 seconds
+      const phUpdateInterval = setInterval(updatePH, 5000);
+      
+      // Start updating water level every 5 minutes (300,000 ms)
+      const waterUpdateInterval = setInterval(updateWaterLevel, 300000);
+      
+      // Run initial updates
       updatePH();
-
-      // Update water gauge by fetching /water_data every 5 seconds
-      async function updateWaterLevel() {
-        try {
-          const response = await fetch('/water_data');
-          const data = await response.json();
-          const sensorPercentage = parseFloat(data.water);
-          const waterOffset = totalArcLength - (sensorPercentage / 100) * totalArcLength;
-          waterProgressPath.style.strokeDashoffset = waterOffset.toFixed(2);
-          waterLabel.textContent = Math.round(sensorPercentage) + '%';
-        } catch (error) {
-          console.error('Error fetching water data:', error);
-        }
-      }
-      setInterval(updateWaterLevel, 5000);
       updateWaterLevel();
+      
+      console.log("Continuous polling initialized");
 
-      // Update Notification Bar based on live values
-      function updateNotificationBar() {
-        const waterValue = parseFloat(waterLabel.textContent);
-        const pHValue = parseFloat(phLabel.textContent);
-        const notificationBar = document.getElementById('notification-bar');
-
-        if (waterValue < lowWaterThreshold || pHValue < minPH || pHValue > maxPH) {
-          notificationBar.style.display = 'block';
-          let message = '';
-          if (waterValue < lowWaterThreshold && (pHValue < minPH || pHValue > maxPH)) {
-            message = 'Warning: Low water level and pH out of range!';
-          } else if (waterValue < lowWaterThreshold) {
-            message = 'Warning: Low water level!';
-          } else {
-            message = 'Warning: pH out of range!';
-          }
-          notificationBar.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
-        } else {
-          notificationBar.style.display = 'none';
-        }
-      }
-
-      // Function to group videos by date
-      function groupVideosByDate(videos) {
-        const groupedVideos = {};
-        videos.forEach(video => {
-          const dateMatch = video.match(/timelapse_(\d{4}-\d{2}-\d{2})/);
-          if (dateMatch) {
-            const date = dateMatch[1];
-            if (!groupedVideos[date]) {
-              groupedVideos[date] = [];
-            }
-            groupedVideos[date].push(video);
-          }
-        });
-        return groupedVideos;
-      }
-
-      // Function to load and display timelapse videos
-      async function loadTimelapseVideos(camera = 'cam1') {
-        try {
-          const response = await fetch(`/timelapse_list?camera=${camera}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const videos = await response.json();
-          const videoGrid = document.getElementById('timelapse-grid');
-          videoGrid.innerHTML = ''; // Clear existing content
-
-          const groupedVideos = groupVideosByDate(videos);
-
-          // Sort dates in descending order
-          const sortedDates = Object.keys(groupedVideos).sort((a, b) => new Date(b) - new Date(a));
-
-          sortedDates.forEach(date => {
-            // Add date group header
-            const dateHeader = document.createElement('div');
-            dateHeader.classList.add('date-group');
-            dateHeader.textContent = date;
-            videoGrid.appendChild(dateHeader);
-
-            // Add videos for this date
-            groupedVideos[date].forEach(videoName => {
-              const thumbnailContainer = document.createElement('div');
-              thumbnailContainer.classList.add('timelapse-thumbnail');
-
-              const img = document.createElement('img');
-              img.src = `/static/${camera}/${videoName.replace('.mp4', '.jpg')}`;
-              img.alt = `Timelapse ${videoName}`;
-
-              const videoLabel = document.createElement('p');
-              videoLabel.textContent = videoName;
-
-              thumbnailContainer.appendChild(img);
-              thumbnailContainer.appendChild(videoLabel);
-
-              thumbnailContainer.addEventListener('click', () => {
-                const video = document.getElementById('timelapse-video');
-                const videoPath = `/static/${camera}/${videoName}`;
-                const timestamp = new Date().getTime(); // cache busting
-                video.innerHTML = `<source src="${videoPath}?t=${timestamp}" type="video/mp4">Your browser does not support the video tag.`;
-                video.load();
-              });
-
-              videoGrid.appendChild(thumbnailContainer);
-            });
-          });
-        } catch (error) {
-          console.error('Error loading timelapse videos:', error);
-        }
-      }
-
-      // Camera selection event listeners
-      document.querySelectorAll('.camera-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          // Remove active class from all buttons
-          document.querySelectorAll('.camera-btn').forEach(b => b.classList.remove('active'));
-
-          // Add active class to clicked button
-          btn.classList.add('active');
-
-          // Load videos for selected camera
-          const camera = btn.dataset.camera;
-          loadTimelapseVideos(camera);
-        });
-      });
-
-      // Modify existing tab click handler to load timelapse videos
-      document.querySelectorAll('.tabs a').forEach((tab) => {
-        tab.addEventListener('click', (e) => {
-          // If Timelapse tab is activated, load videos
-          if (tab.getAttribute('href') === "#timelapse") {
-            // Load videos for currently active camera
-            const activeCamera = document.querySelector('.camera-btn.active').dataset.camera;
-            loadTimelapseVideos(activeCamera);
-          }
-        });
-      });
-
+      // Rest of the existing code...
       // Optional: Load videos when page loads if timelapse tab is active
       if (document.querySelector('.tabs a[href="#timelapse"]').classList.contains('active')) {
         loadTimelapseVideos();
