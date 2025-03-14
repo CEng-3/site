@@ -777,22 +777,22 @@ def stitch_timelapse():
             cam1_path = os.path.join(app.static_folder, 'cam1', f"timelapse_{day_str}.mp4")
             cam2_path = os.path.join(app.static_folder, 'cam2', f"timelapse_{day_str}.mp4")
 
-            # Skip if either camera file doesn't exist
             if not (os.path.exists(cam1_path) and os.path.exists(cam2_path)):
                 current_date += datetime.timedelta(days=1)
                 continue
 
-            # Output path for this day’s side-by-side video
             sbs_out = os.path.join('static', f"sbs_{day_str}.mp4")
-            # ffmpeg filter to place the two videos side by side in 16:9
+            # Scale both videos to 960×1080, then place side by side for a 1920×1080 final
             ffmpeg_sbs = [
                 'ffmpeg',
                 '-i', cam1_path,
                 '-i', cam2_path,
                 '-filter_complex',
-                '[0:v][1:v]hstack=inputs=2[v]',
+                '[0:v]scale=960:1080:force_original_aspect_ratio=decrease:force_divisible_by=2[vid0];'
+                '[1:v]scale=960:1080:force_original_aspect_ratio=decrease:force_divisible_by=2[vid1];'
+                '[vid0][vid1]hstack=inputs=2[v]',
                 '-map', '[v]',
-                '-map', '0:a?',  # use audio if present
+                '-map', '0:a?',
                 '-c:v', 'libx264',
                 '-crf', '23',
                 '-preset', 'veryfast',
