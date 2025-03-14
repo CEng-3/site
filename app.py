@@ -10,6 +10,7 @@ import socket
 import pickle
 import struct
 import smtplib
+import subprocess
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -756,6 +757,54 @@ def threshold_monitor():
             print(f"Error in threshold monitor: {e}")
         
         time.sleep(300)  # Check every minute - this is the delay between checks
+
+@app.route('/stitch_timelapse')
+def stitch_timelapse():
+    start_date = request.args.get('start')
+    end_date = request.args.get('end')
+    camera = request.args.get('camera', 'cam1')
+
+    if not start_date or not end_date:
+        return jsonify({"status": "error", "message": "Start and end dates are required"}), 400
+
+    try:
+        # Generate the list of video files to stitch
+        video_files = []
+        current_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+
+        while current_date <= end_date:
+            video_name = f"timelapse_{current_date.strftime('%Y-%m-%d')}.mp4"
+            video_path = os.path.join('static', camera, video_name)
+            if os.path.exists(video_path):
+                video_files.append(video_path)
+            current_date += datetime.timedelta(days=1)
+
+        if not video_files:
+            return jsonify({"status": "error", "message": "No videos found for the selected date range"}), 404
+
+        # Create a temporary file to store the list of videos
+        list_file_path = os.path.join('static', 'video_list.txt')
+        with open(list_file_path, 'w') as list_file:
+            for video_file in video_files:
+                list_file.write(f"file '{video_file}'\n")
+
+        # Output file path
+        output_file_path = os.path.join('static', f"stitched_{camera}_{start_date}_{end_date}.mp4")
+
+        # Use ffmpeg to stitch the videos together
+        ffmpeg_command = [
+            'ffmpeg', '-f', 'concat', '-safe', '0', '-i', list_file_path,
+            '-c', 'copy', output_file_path
+        ]
+        subprocess.run(ffmpeg_command, check=True)
+
+        return jsonify({"status": "success", "cam1_video_url": url_for('static', filename=f"stitched_cam1_{start_date}_{end_date}.mp4"),
+                        "cam2_video_url": url_for('static', filename=f"stitched_cam2_{start_date}_{end_date}.mp4")})
+
+    except Exception as e:
+        print(f"Error stitching videos: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # Main Execution
 if __name__ == '__main__':
