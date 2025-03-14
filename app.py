@@ -793,9 +793,9 @@ def stitch_timelapse():
                 '[vid0][vid1]hstack=inputs=2[v]',
                 '-map', '[v]',
                 '-map', '0:a?',
-                '-c:v', 'libx264',
+                '-c:v', 'h264_omx',       # Use Pi’s OMX hardware encoder
                 '-crf', '23',
-                '-preset', 'veryfast',
+                '-preset', 'ultrafast',   # Switch to ultrafast for speed
                 sbs_out
             ]
             subprocess.run(ffmpeg_sbs, check=True)
