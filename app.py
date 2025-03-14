@@ -80,8 +80,8 @@ def get_ph_reading():
     if ph_sensor_available:
         try:
             ph_value = read_ph()
-            # Check for negative values and use previous value if needed
-            if ph_value < 0:
+            # Check for negative values or values over 14 and use previous value if needed
+            if ph_value < 0 or ph_value > 14:
                 previous_readings = get_latest_readings()
                 ph_value = previous_readings['ph']
             return ph_value

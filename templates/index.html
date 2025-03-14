@@ -774,9 +774,9 @@
             window.lastValidPH = 7.0; // Default neutral pH
           }
           
-          // Check if pH is negative, use last valid value if it is
-          if (phValue < 0) {
-            console.warn('Received negative pH value, using last valid value instead');
+          // Check if pH is negative or above 14, use last valid value if it is
+          if (phValue < 0 || phValue > 14) {
+            console.warn('Received invalid pH value (' + phValue + '), using last valid value instead');
             phValue = window.lastValidPH;
           } else {
             // Update the last valid pH value
