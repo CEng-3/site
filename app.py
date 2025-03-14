@@ -775,7 +775,7 @@ def stitch_timelapse():
 
         while current_date <= end_date:
             video_name = f"timelapse_{current_date.strftime('%Y-%m-%d')}.mp4"
-            video_path = os.path.join('static', camera, video_name)
+            video_path = os.path.join(app.static_folder, camera, video_name)
             if os.path.exists(video_path):
                 video_files.append(video_path)
             current_date += datetime.timedelta(days=1)
@@ -799,8 +799,7 @@ def stitch_timelapse():
         ]
         subprocess.run(ffmpeg_command, check=True)
 
-        return jsonify({"status": "success", "cam1_video_url": url_for('static', filename=f"stitched_cam1_{start_date}_{end_date}.mp4"),
-                        "cam2_video_url": url_for('static', filename=f"stitched_cam2_{start_date}_{end_date}.mp4")})
+        return jsonify({"status": "success", "cam1_video_url": url_for('static', filename=f"stitched_{camera}_{start_date}_{end_date}.mp4")})
 
     except Exception as e:
         print(f"Error stitching videos: {e}")
