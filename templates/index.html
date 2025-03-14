@@ -1023,161 +1023,180 @@
       }
     });
 
-    // Timelapse related code
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize variables to store available videos
-  let availableVideos = {
-    cam1: {},
-    cam2: {}
-  };
-  
-  // Initialize date picker
-  const timelapseDate = flatpickr('#timelapseDate', {
-    dateFormat: 'Y-m-d',
-    disableMobile: true,
-    maxDate: 'today',
-    onOpen: (selectedDates, dateStr, instance) => {
-      instance.calendarContainer.classList.add('centered-popup');
-    },
-    onClose: (selectedDates, dateStr, instance) => {
-      instance.calendarContainer.classList.remove('centered-popup');
-      if (dateStr) {
-        loadVideosForDate(dateStr);
-      }
-    },
-    onChange: (selectedDates, dateStr) => {
-      if (dateStr) {
-        loadVideosForDate(dateStr);
-      }
-    }
-  });
-  
-  // Function to extract date from filename
-  function extractDateFromFilename(filename) {
-    const dateMatch = filename.match(/timelapse_(\d{4}-\d{2}-\d{2})/);
-    if (dateMatch) {
-      return dateMatch[1];
-    }
-    return null;
-  }
-  
-  // Function to load videos for both cameras
-  async function loadTimelapseVideos() {
-    try {
-      // Fetch videos for cam1
-      const responseCam1 = await fetch('/timelapse_list?camera=cam1');
-      if (!responseCam1.ok) {
-        throw new Error(`HTTP error! status: ${responseCam1.status}`);
-      }
-      const videosCam1 = await responseCam1.json();
-      
-      // Fetch videos for cam2
-      const responseCam2 = await fetch('/timelapse_list?camera=cam2');
-      if (!responseCam2.ok) {
-        throw new Error(`HTTP error! status: ${responseCam2.status}`);
-      }
-      const videosCam2 = await responseCam2.json();
-      
-      // Organize videos by date for each camera
-      availableVideos = {
-        cam1: {},
-        cam2: {}
-      };
-      
-      videosCam1.forEach(video => {
-        const date = extractDateFromFilename(video);
-        if (date) {
-          if (!availableVideos.cam1[date]) {
-            availableVideos.cam1[date] = [];
-          }
-          availableVideos.cam1[date].push(video);
+    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize variables to store available videos
+    let availableVideos = {
+      cam1: {},
+      cam2: {}
+    };
+    
+    // Initialize date picker
+    const timelapseDate = flatpickr('#timelapseDate', {
+      dateFormat: 'Y-m-d',
+      disableMobile: true,
+      maxDate: 'today',
+      onOpen: (selectedDates, dateStr, instance) => {
+        instance.calendarContainer.classList.add('centered-popup');
+      },
+      onClose: (selectedDates, dateStr, instance) => {
+        instance.calendarContainer.classList.remove('centered-popup');
+        if (dateStr) {
+          loadVideosForDate(dateStr);
         }
-      });
-      
-      videosCam2.forEach(video => {
-        const date = extractDateFromFilename(video);
-        if (date) {
-          if (!availableVideos.cam2[date]) {
-            availableVideos.cam2[date] = [];
-          }
-          availableVideos.cam2[date].push(video);
+      },
+      onChange: (selectedDates, dateStr) => {
+        if (dateStr) {
+          loadVideosForDate(dateStr);
         }
-      });
-      
-      // Get all available dates from both cameras
-      const allDates = new Set();
-      Object.keys(availableVideos.cam1).forEach(date => allDates.add(date));
-      Object.keys(availableVideos.cam2).forEach(date => allDates.add(date));
-      
-      // Convert to array and sort (newest first)
-      const sortedDates = Array.from(allDates).sort((a, b) => 
-        new Date(b) - new Date(a)
-      );
-      
-      // Set available dates for the date picker
-      if (sortedDates.length > 0) {
-        timelapseDate.set("enable", sortedDates);
-        
-        // Set the most recent date and load its videos
-        timelapseDate.setDate(sortedDates[0]);
-        loadVideosForDate(sortedDates[0]);
-      } else {
-        console.log("No timelapse videos available");
-      }
-      
-    } catch (error) {
-      console.error('Error loading timelapse videos:', error);
-    }
-  }
-
-  // Function to load videos for a specific date
-  function loadVideosForDate(date) {
-    const video1 = document.getElementById('timelapse-video-cam1');
-    const video2 = document.getElementById('timelapse-video-cam2');
-    
-    // Common video name format
-    const videoName = `timelapse_${date}.mp4`;
-    const timestamp = new Date().getTime(); // cache busting
-    
-    // Set source for video 1 (Towergarden)
-    video1.innerHTML = '';
-    if (availableVideos.cam1[date] && availableVideos.cam1[date].length > 0) {
-      const source1 = document.createElement('source');
-      source1.src = `/static/cam1/${videoName}?t=${timestamp}`;
-      source1.type = 'video/mp4';
-      video1.appendChild(source1);
-      video1.load();
-    } else {
-      video1.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
-    }
-    
-    // Set source for video 2 (Kitchen)
-    video2.innerHTML = '';
-    if (availableVideos.cam2[date] && availableVideos.cam2[date].length > 0) {
-      const source2 = document.createElement('source');
-      source2.src = `/static/cam2/${videoName}?t=${timestamp}`;
-      source2.type = 'video/mp4';
-      video2.appendChild(source2);
-      video2.load();
-    } else {
-      video2.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
-    }
-  }
-
-  // Load videos when the timelapse tab is activated
-  document.querySelectorAll('.tabs a').forEach((tab) => {
-    tab.addEventListener('click', (e) => {
-      if (tab.getAttribute('href') === "#timelapse") {
-        loadTimelapseVideos();
       }
     });
-  });
+    
+    // Function to extract date from filename
+    function extractDateFromFilename(filename) {
+      const dateMatch = filename.match(/timelapse_(\d{4}-\d{2}-\d{2})/);
+      if (dateMatch) {
+        return dateMatch[1];
+      }
+      return null;
+    }
+    
+    // Function to load videos for both cameras
+    async function loadTimelapseVideos() {
+      try {
+        // Fetch videos for cam1
+        const responseCam1 = await fetch('/timelapse_list?camera=cam1');
+        if (!responseCam1.ok) {
+          throw new Error(`HTTP error! status: ${responseCam1.status}`);
+        }
+        const videosCam1 = await responseCam1.json();
+        
+        // Fetch videos for cam2
+        const responseCam2 = await fetch('/timelapse_list?camera=cam2');
+        if (!responseCam2.ok) {
+          throw new Error(`HTTP error! status: ${responseCam2.status}`);
+        }
+        const videosCam2 = await responseCam2.json();
+        
+        // Organize videos by date for each camera
+        availableVideos = {
+          cam1: {},
+          cam2: {}
+        };
+        
+        videosCam1.forEach(video => {
+          const date = extractDateFromFilename(video);
+          if (date) {
+            if (!availableVideos.cam1[date]) {
+              availableVideos.cam1[date] = [];
+            }
+            availableVideos.cam1[date].push(video);
+          }
+        });
+        
+        videosCam2.forEach(video => {
+          const date = extractDateFromFilename(video);
+          if (date) {
+            if (!availableVideos.cam2[date]) {
+              availableVideos.cam2[date] = [];
+            }
+            availableVideos.cam2[date].push(video);
+          }
+        });
+        
+        // Get all available dates from both cameras
+        const allDates = new Set();
+        Object.keys(availableVideos.cam1).forEach(date => allDates.add(date));
+        Object.keys(availableVideos.cam2).forEach(date => allDates.add(date));
+        
+        // Convert to array and sort (newest first)
+        const sortedDates = Array.from(allDates).sort((a, b) => 
+          new Date(b) - new Date(a)
+        );
+        
+        // Set available dates for the date picker
+        if (sortedDates.length > 0) {
+          timelapseDate.set("enable", sortedDates);
+          
+          // Set the most recent date and load its videos
+          timelapseDate.setDate(sortedDates[0]);
+          loadVideosForDate(sortedDates[0]);
+        } else {
+          console.log("No timelapse videos available");
+        }
+        
+      } catch (error) {
+        console.error('Error loading timelapse videos:', error);
+      }
+    }
 
-  // If timelapse tab is active on page load, load the videos
-  if (document.querySelector('.tabs a[href="#timelapse"]').classList.contains('active')) {
-    loadTimelapseVideos();
-  }
-});
+    // Function to load videos for a specific date
+    function loadVideosForDate(date) {
+      const video1 = document.getElementById('timelapse-video-cam1');
+      const video2 = document.getElementById('timelapse-video-cam2');
+      
+      // Common video name format
+      const videoName = `timelapse_${date}.mp4`;
+      const timestamp = new Date().getTime(); // cache busting
+      
+      // Set source for video 1 (Towergarden)
+      video1.innerHTML = '';
+      if (availableVideos.cam1[date] && availableVideos.cam1[date].length > 0) {
+        const source1 = document.createElement('source');
+        source1.src = `/static/cam1/${videoName}?t=${timestamp}`;
+        source1.type = 'video/mp4';
+        video1.appendChild(source1);
+        video1.load();
+      } else {
+        video1.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
+      }
+      
+      // Set source for video 2 (Kitchen)
+      video2.innerHTML = '';
+      if (availableVideos.cam2[date] && availableVideos.cam2[date].length > 0) {
+        const source2 = document.createElement('source');
+        source2.src = `/static/cam2/${videoName}?t=${timestamp}`;
+        source2.type = 'video/mp4';
+        video2.appendChild(source2);
+        video2.load();
+      } else {
+        video2.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
+      }
+    }
+
+    // Synchronize play/pause actions between both videos
+    const video1 = document.getElementById('timelapse-video-cam1');
+    const video2 = document.getElementById('timelapse-video-cam2');
+
+    video1.addEventListener('play', () => {
+      video2.play();
+    });
+
+    video1.addEventListener('pause', () => {
+      video2.pause();
+    });
+
+    video2.addEventListener('play', () => {
+      video1.play();
+    });
+
+    video2.addEventListener('pause', () => {
+      video1.pause();
+    });
+
+    // Load videos when the timelapse tab is activated
+    document.querySelectorAll('.tabs a').forEach((tab) => {
+      tab.addEventListener('click', (e) => {
+        if (tab.getAttribute('href') === "#timelapse") {
+          loadTimelapseVideos();
+        }
+      });
+    });
+
+    // If timelapse tab is active on page load, load the videos
+    if (document.querySelector('.tabs a[href="#timelapse"]').classList.contains('active')) {
+      loadTimelapseVideos();
+    }
+  });
   </script>
   <!-- Flatpickr JS -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js"></script>
