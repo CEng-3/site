@@ -537,24 +537,6 @@
   transform: translate(-50%, -50%) !important;
   margin: 0 !important;
 }
-
-.video-loading {
-  text-align: center;
-  padding: 2rem;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 0.25rem;
-  color: #007bff;
-  font-style: italic;
-}
-
-.video-unavailable {
-  text-align: center;
-  padding: 2rem;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 0.25rem;
-  font-style: italic;
-  color: #666;
-}
   </style>
   <!-- Flatpickr CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
@@ -1157,89 +1139,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const videoName = `timelapse_${date}.mp4`;
     const timestamp = new Date().getTime(); // cache busting
     
-    // First, pause any currently playing videos
-    if (!video1.paused) video1.pause();
-    if (!video2.paused) video2.pause();
-    
-    // Show loading indicator
-    video1.innerHTML = '<p class="video-loading">Loading video...</p>';
-    video2.innerHTML = '<p class="video-loading">Loading video...</p>';
-    
     // Set source for video 1 (Towergarden)
-    loadVideo(video1, `/static/cam1/${videoName}?t=${timestamp}`, "Towergarden");
+    video1.innerHTML = '';
+    if (availableVideos.cam1[date] && availableVideos.cam1[date].length > 0) {
+      const source1 = document.createElement('source');
+      source1.src = `/static/cam1/${videoName}?t=${timestamp}`;
+      source1.type = 'video/mp4';
+      video1.appendChild(source1);
+      video1.load();
+    } else {
+      video1.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
+    }
     
     // Set source for video 2 (Kitchen)
-    loadVideo(video2, `/static/cam2/${videoName}?t=${timestamp}`, "Kitchen");
-    
-    // After videos are loaded, set up synchronization
-    // We'll do this in the loadVideo function after both are loaded
-  }
+    video2.innerHTML = '';
+    if (availableVideos.cam2[date] && availableVideos.cam2[date].length > 0) {
+      const source2 = document.createElement('source');
+      source2.src = `/static/cam2/${videoName}?t=${timestamp}`;
+      source2.type = 'video/mp4';
+      video2.appendChild(source2);
+      video2.load();
+    } else {
+      video2.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
+    }
 
-  // Helper function to load a video with proper error handling
-  function loadVideo(videoElement, src, cameraName) {
-    // Create a new video element
-    const newVideo = document.createElement('video');
-    newVideo.className = 'timelapse-video';
-    newVideo.controls = true;
-    
-    // Set up error handling
-    newVideo.onerror = function() {
-      videoElement.innerHTML = `<p class="video-unavailable">No video available for this date</p>`;
-      checkSyncReady();
-    };
-    
-    // Set up load event
-    newVideo.onloadeddata = function() {
-      // Replace the old video element with the new one
-      videoElement.parentNode.replaceChild(newVideo, videoElement);
-      checkSyncReady();
-    };
-    
-    // Add a timeout in case the video takes too long to load
-    const timeout = setTimeout(() => {
-      if (!newVideo.readyState) {
-        newVideo.onerror();
-        console.warn(`Video load timeout for ${cameraName}`);
-      }
-    }, 5000); // 5 second timeout
-    
-    // Set source and start loading
-    const sourceElement = document.createElement('source');
-    sourceElement.src = src;
-    sourceElement.type = 'video/mp4';
-    newVideo.appendChild(sourceElement);
-    newVideo.load();
-    
-    // Keep track of which videos are loaded for sync
-    if (!window.videosLoaded) {
-      window.videosLoaded = { cam1: false, cam2: false };
-    }
-    window.videosLoaded[cameraName === 'Towergarden' ? 'cam1' : 'cam2'] = false;
-    
-    // Function to check if both videos are ready for sync
-    function checkSyncReady() {
-      clearTimeout(timeout); // Clear the timeout when the video loads or errors
-      
-      window.videosLoaded[cameraName === 'Towergarden' ? 'cam1' : 'cam2'] = true;
-      
-      // If both videos are loaded or have errored out, set up sync
-      if (window.videosLoaded.cam1 && window.videosLoaded.cam2) {
-        setupVideoSync(
-          document.getElementById('timelapse-video-cam1'), 
-          document.getElementById('timelapse-video-cam2')
-        );
-      }
-    }
+    // Add synchronization for play/pause/seeking between videos
+    setupVideoSync(video1, video2);
   }
 
   // Function to synchronize video players
   function setupVideoSync(video1, video2) {
-    // Only try to sync if both are actual video elements (not error messages)
-    if (!video1 || !video2 || 
-        video1.tagName !== 'VIDEO' || 
-        video2.tagName !== 'VIDEO') {
-      return;
-    }
+    if (!video1 || !video2) return;
     
     // Clear any existing event listeners
     video1.onplay = null;
@@ -1254,75 +1184,41 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Synchronize play events
     video1.onplay = function() {
-      try {
-        if (video2.paused) video2.play().catch(err => console.warn('Cannot play second video:', err));
-      } catch (e) {
-        console.warn('Error synchronizing play:', e);
-      }
+      if (video2.paused) video2.play();
     };
     
     video2.onplay = function() {
-      try {
-        if (video1.paused) video1.play().catch(err => console.warn('Cannot play first video:', err));
-      } catch (e) {
-        console.warn('Error synchronizing play:', e);
-      }
+      if (video1.paused) video1.play();
     };
     
     // Synchronize pause events
     video1.onpause = function() {
-      try {
-        if (!video2.paused) video2.pause();
-      } catch (e) {
-        console.warn('Error synchronizing pause:', e);
-      }
+      if (!video2.paused) video2.pause();
     };
     
     video2.onpause = function() {
-      try {
-        if (!video1.paused) video1.pause();
-      } catch (e) {
-        console.warn('Error synchronizing pause:', e);
-      }
+      if (!video1.paused) video1.pause();
     };
     
     // Synchronize seeking (time position)
     video1.onseeking = function() {
-      try {
-        video2.currentTime = video1.currentTime;
-      } catch (e) {
-        console.warn('Error synchronizing seeking:', e);
-      }
+      video2.currentTime = video1.currentTime;
     };
     
     video2.onseeking = function() {
-      try {
-        video1.currentTime = video2.currentTime;
-      } catch (e) {
-        console.warn('Error synchronizing seeking:', e);
-      }
+      video1.currentTime = video2.currentTime;
     };
     
     // Optional: Synchronize volume changes
     video1.onvolumechange = function() {
-      try {
-        video2.volume = video1.volume;
-        video2.muted = video1.muted;
-      } catch (e) {
-        console.warn('Error synchronizing volume:', e);
-      }
+      video2.volume = video1.volume;
+      video2.muted = video1.muted;
     };
     
     video2.onvolumechange = function() {
-      try {
-        video1.volume = video2.volume;
-        video1.muted = video2.muted;
-      } catch (e) {
-        console.warn('Error synchronizing volume:', e);
-      }
+      video1.volume = video2.volume;
+      video1.muted = video2.muted;
     };
-    
-    console.log('Video synchronization set up successfully');
   }
 
   // Load videos when the timelapse tab is activated
