@@ -14,7 +14,7 @@ import subprocess
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from flask import Flask, Response, render_template, request, session, redirect, url_for, jsonify
+from flask import Flask, Response, render_template, request, session, redirect, url_for, jsonify, send_file
 
 # Hardware libraries with fallback
 try:
@@ -762,44 +762,67 @@ def threshold_monitor():
 def stitch_timelapse():
     start_date = request.args.get('start')
     end_date = request.args.get('end')
-    camera = request.args.get('camera', 'cam1')
 
     if not start_date or not end_date:
         return jsonify({"status": "error", "message": "Start and end dates are required"}), 400
 
     try:
-        # Generate the list of video files to stitch
-        video_files = []
+        # Build a list of daily pairs (cam1 + cam2) and create side-by-side outputs
         current_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
         end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+        daily_sidebyside_files = []
 
         while current_date <= end_date:
-            video_name = f"timelapse_{current_date.strftime('%Y-%m-%d')}.mp4"
-            video_path = os.path.join(app.static_folder, camera, video_name)
-            if os.path.exists(video_path):
-                video_files.append(video_path)
+            day_str = current_date.strftime('%Y-%m-%d')
+            cam1_path = os.path.join(app.static_folder, 'cam1', f"timelapse_{day_str}.mp4")
+            cam2_path = os.path.join(app.static_folder, 'cam2', f"timelapse_{day_str}.mp4")
+
+            # Skip if either camera file doesn't exist
+            if not (os.path.exists(cam1_path) and os.path.exists(cam2_path)):
+                current_date += datetime.timedelta(days=1)
+                continue
+
+            # Output path for this day’s side-by-side video
+            sbs_out = os.path.join('static', f"sbs_{day_str}.mp4")
+            # ffmpeg filter to place the two videos side by side in 16:9
+            ffmpeg_sbs = [
+                'ffmpeg',
+                '-i', cam1_path,
+                '-i', cam2_path,
+                '-filter_complex',
+                '[0:v][1:v]hstack=inputs=2[v]',
+                '-map', '[v]',
+                '-map', '0:a?',  # use audio if present
+                '-c:v', 'libx264',
+                '-crf', '23',
+                '-preset', 'veryfast',
+                sbs_out
+            ]
+            subprocess.run(ffmpeg_sbs, check=True)
+            daily_sidebyside_files.append(sbs_out)
             current_date += datetime.timedelta(days=1)
 
-        if not video_files:
-            return jsonify({"status": "error", "message": "No videos found for the selected date range"}), 404
+        if not daily_sidebyside_files:
+            return jsonify({"status": "error", "message": "No valid pairs found"}), 404
 
-        # Create a temporary file to store the list of videos
-        list_file_path = os.path.join('static', 'video_list.txt')
+        # Create a list of daily side-by-side files to concatenate in chronological sequence
+        list_file_path = os.path.join('static', 'sbs_list.txt')
         with open(list_file_path, 'w') as list_file:
-            for video_file in video_files:
-                list_file.write(f"file '{video_file}'\n")
+            for f in daily_sidebyside_files:
+                list_file.write(f"file '{f}'\n")
 
-        # Output file path
-        output_file_path = os.path.join('static', f"stitched_{camera}_{start_date}_{end_date}.mp4")
-
-        # Use ffmpeg to stitch the videos together
-        ffmpeg_command = [
-            'ffmpeg', '-f', 'concat', '-safe', '0', '-i', list_file_path,
-            '-c', 'copy', output_file_path
+        # Final stitched output
+        final_output = os.path.join('static', f"stitched_sbs_{start_date}_{end_date}.mp4")
+        ffmpeg_concat = [
+            'ffmpeg', '-f', 'concat', '-safe', '0',
+            '-i', list_file_path,
+            '-c', 'copy',
+            final_output
         ]
-        subprocess.run(ffmpeg_command, check=True)
+        subprocess.run(ffmpeg_concat, check=True)
 
-        return jsonify({"status": "success", "cam1_video_url": url_for('static', filename=f"stitched_{camera}_{start_date}_{end_date}.mp4")})
+        # Return the file as a download
+        return send_file(final_output, as_attachment=True)
 
     except Exception as e:
         print(f"Error stitching videos: {e}")
