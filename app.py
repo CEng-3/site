@@ -788,14 +788,15 @@ def stitch_timelapse():
                 '-i', cam1_path,
                 '-i', cam2_path,
                 '-filter_complex',
-                '[0:v]scale=960:1080:force_original_aspect_ratio=decrease:force_divisible_by=2[vid0];'
-                '[1:v]scale=960:1080:force_original_aspect_ratio=decrease:force_divisible_by=2[vid1];'
+                '[0:v]scale=960:1080:force_original_aspect_ratio=decrease:force_divisible_by=2,fps=30[vid0];'
+                '[1:v]scale=960:1080:force_original_aspect_ratio=decrease:force_divisible_by=2,fps=30[vid1];'
                 '[vid0][vid1]hstack=inputs=2[v]',
                 '-map', '[v]',
                 '-map', '0:a?',
-                '-c:v', 'h264_omx',       # Use Pi’s OMX hardware encoder
+                '-c:v', 'libx264',         # Fallback to libx264
                 '-crf', '23',
-                '-preset', 'ultrafast',   # Switch to ultrafast for speed
+                '-preset', 'ultrafast',
+                '-movflags', '+faststart', # Helpful for MP4
                 sbs_out
             ]
             subprocess.run(ffmpeg_sbs, check=True)
