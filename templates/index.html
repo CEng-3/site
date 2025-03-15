@@ -621,6 +621,12 @@
     <label for="timelapseDate">Select Date:</label>
     <input type="text" id="timelapseDate" class="date-picker" placeholder="Pick a date">
   </div>
+  
+  <!-- Add a second picker for date range -->
+  <div class="date-picker-container">
+    <label for="timelapseDateRange">Select Date Range:</label>
+    <input type="text" id="timelapseDateRange" class="date-picker" placeholder="Pick a date range">
+  </div>
 
   <!-- Two video players side by side -->
   <div class="timelapse-players">
@@ -1197,6 +1203,65 @@
       loadTimelapseVideos();
     }
   });
+
+  const timelapseDateRange = flatpickr('#timelapseDateRange', {
+    mode: 'range',
+    dateFormat: 'Y-m-d',
+    disableMobile: true,
+    onOpen: (selectedDates, dateStr, instance) => {
+      instance.calendarContainer.classList.add('centered-popup');
+    },
+    onClose: (selectedDates, dateStr, instance) => {
+      instance.calendarContainer.classList.remove('centered-popup');
+    },
+    onChange: (selectedDates) => {
+      // Once two dates are selected
+      if (selectedDates.length === 2) {
+        const startDate = selectedDates[0];
+        const endDate = selectedDates[1];
+        const dateArray = getDateArray(startDate, endDate);
+        playTimelapseSequence(dateArray);
+      }
+    }
+  });
+
+  // Helper to build an array of YYYY-MM-DD strings from start to end
+  function getDateArray(start, end) {
+    const arr = [];
+    let current = new Date(start);
+    while (current <= end) {
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      const day = String(current.getDate()).padStart(2, '0');
+      arr.push(`${year}-${month}-${day}`);
+      current.setDate(current.getDate() + 1);
+    }
+    return arr;
+  }
+
+  // Sequential playback for each day in the chosen range
+  function playTimelapseSequence(dates, index = 0) {
+    if (index >= dates.length) return;
+    loadVideosForDate(dates[index]);
+    const video1 = document.getElementById('timelapse-video-cam1');
+    const video2 = document.getElementById('timelapse-video-cam2');
+
+    // When one of them finishes, load next date's videos
+    const handleEnded = () => {
+      video1.onended = null;
+      video2.onended = null;
+      playTimelapseSequence(dates, index + 1);
+    };
+
+    video1.onended = handleEnded;
+    video2.onended = handleEnded;
+
+    // Trigger load & play once sources are set
+    video1.load();
+    video2.load();
+    video1.play();
+    video2.play();
+  }
   </script>
   <!-- Flatpickr JS -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js"></script>
