@@ -618,8 +618,13 @@
 
   <!-- Date picker section -->
   <div class="date-picker-container">
-    <label for="timelapseDate">Select Date:</label>
-    <input type="text" id="timelapseDate" class="date-picker" placeholder="Pick a date">
+    <label for="timelapseStartDate">Start Date:</label>
+    <input type="text" id="timelapseStartDate" class="date-picker" placeholder="Pick a start date">
+  </div>
+
+  <div class="date-picker-container">
+    <label for="timelapseEndDate">End Date:</label>
+    <input type="text" id="timelapseEndDate" class="date-picker" placeholder="Pick an end date">
   </div>
 
   <!-- Two video players side by side -->
@@ -1029,9 +1034,13 @@
       cam1: {},
       cam2: {}
     };
-    
-    // Initialize date picker
-    const timelapseDate = flatpickr('#timelapseDate', {
+
+    let timelapseStartDatePicker, timelapseEndDatePicker;
+    let startDate, endDate;
+    let currentDate;
+
+    // Initialize date pickers
+    timelapseStartDatePicker = flatpickr('#timelapseStartDate', {
       dateFormat: 'Y-m-d',
       disableMobile: true,
       maxDate: 'today',
@@ -1040,13 +1049,37 @@
       },
       onClose: (selectedDates, dateStr, instance) => {
         instance.calendarContainer.classList.remove('centered-popup');
-        if (dateStr) {
-          loadVideosForDate(dateStr);
+        if (dateStr && endDate) {
+          startDate = dateStr;
+          loadVideosForDate(startDate);
         }
       },
       onChange: (selectedDates, dateStr) => {
-        if (dateStr) {
-          loadVideosForDate(dateStr);
+        if (dateStr && endDate) {
+          startDate = dateStr;
+          loadVideosForDate(startDate);
+        }
+      }
+    });
+
+    timelapseEndDatePicker = flatpickr('#timelapseEndDate', {
+      dateFormat: 'Y-m-d',
+      disableMobile: true,
+      maxDate: 'today',
+      onOpen: (selectedDates, dateStr, instance) => {
+        instance.calendarContainer.classList.add('centered-popup');
+      },
+      onClose: (selectedDates, dateStr, instance) => {
+        instance.calendarContainer.classList.remove('centered-popup');
+          if (dateStr && startDate) {
+            endDate = dateStr;
+            loadVideosForDate(startDate);
+          }
+      },
+      onChange: (selectedDates, dateStr) => {
+        if (dateStr && startDate) {
+          endDate = dateStr;
+          loadVideosForDate(startDate);
         }
       }
     });
@@ -1131,6 +1164,7 @@
 
     // Function to load videos for a specific date
     function loadVideosForDate(date) {
+      currentDate = date;
       const video1 = document.getElementById('timelapse-video-cam1');
       const video2 = document.getElementById('timelapse-video-cam2');
       
@@ -1140,27 +1174,67 @@
       
       // Set source for video 1 (Towergarden)
       video1.innerHTML = '';
+      let video1Available = false;
       if (availableVideos.cam1[date] && availableVideos.cam1[date].length > 0) {
         const source1 = document.createElement('source');
         source1.src = `/static/cam1/${videoName}?t=${timestamp}`;
         source1.type = 'video/mp4';
         video1.appendChild(source1);
         video1.load();
+        video1Available = true;
       } else {
         video1.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
+        video1Available = false;
       }
       
       // Set source for video 2 (Kitchen)
       video2.innerHTML = '';
+      let video2Available = false;
       if (availableVideos.cam2[date] && availableVideos.cam2[date].length > 0) {
         const source2 = document.createElement('source');
         source2.src = `/static/cam2/${videoName}?t=${timestamp}`;
         source2.type = 'video/mp4';
         video2.appendChild(source2);
         video2.load();
+        video2Available = true;
       } else {
         video2.innerHTML = '<p class="video-unavailable">No video available for this date</p>';
+        video2Available = false;
       }
+
+      // If either video is unavailable, skip to the next date after a delay
+      if (!video1Available || !video2Available) {
+        setTimeout(() => {
+          playNextDay();
+        }, 3000); // Wait 3 seconds before proceeding
+      }
+    }
+
+    function playNextDay() {
+      if (!startDate || !endDate) return;
+
+      let nextDate = getNextDate(currentDate);
+
+      if (nextDate <= endDate) {
+        loadVideosForDate(nextDate);
+      } else {
+        console.log("End of date range");
+      }
+    }
+
+    function getNextDate(date) {
+      let dt = new Date(date);
+      dt.setDate(dt.getDate() + 1);
+      let month = '' + (dt.getMonth() + 1);
+      let day = '' + dt.getDate();
+      let year = dt.getFullYear();
+
+      if (month.length < 2) 
+          month = '0' + month;
+      if (day.length < 2) 
+          day = '0' + day;
+
+      return [year, month, day].join('-');
     }
 
     // Synchronize play/pause actions between both videos
@@ -1181,6 +1255,28 @@
 
     video2.addEventListener('pause', () => {
       video1.pause();
+    });
+
+    // Event listeners to trigger playNextDay when both videos end
+    let video1Ended = false;
+    let video2Ended = false;
+
+    video1.addEventListener('ended', () => {
+      video1Ended = true;
+      if (video2Ended) {
+        video1Ended = false;
+        video2Ended = false;
+        playNextDay();
+      }
+    });
+
+    video2.addEventListener('ended', () => {
+      video2Ended = true;
+      if (video1Ended) {
+        video1Ended = false;
+        video2Ended = false;
+        playNextDay();
+      }
     });
 
     // Load videos when the timelapse tab is activated
