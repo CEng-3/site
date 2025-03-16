@@ -587,6 +587,8 @@
           Images per hour
           <input type="number" id="images-per-hour" name="images-per-hour" placeholder="Images" />
         </label>
+
+        <button type="button" id="save-config-btn">Save Configuration</button>
       </div>
       
       <!-- Water Level Threshold -->
@@ -787,165 +789,211 @@
       });
     }
     
-    document.addEventListener("DOMContentLoaded", function() {
-      // Load thresholds on page load
-      loadThresholds();
+  // Function to load timelapse configuration from the server
+  function loadTimelapseConfig() {
+    fetch('/timelapse-config.json')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("hours-to-run").value = data.hours_to_run || '';
+        document.getElementById("images-per-hour").value = data.images_per_hour || '';
+      })
+      .catch(error => console.error('Error loading timelapse configuration:', error));
+  }
 
-      // Modify existing event listeners to save thresholds to server
-      document.getElementById("decrement-btn").addEventListener("click", function() {
-        const sensorLevelInput = document.getElementById("sensor-level");
-        let currentValue = parseFloat(sensorLevelInput.value) || 0;
-        if (currentValue > 0) {
-          currentValue--;
-          sensorLevelInput.value = currentValue + '%';
-          
-          // Save thresholds after changing
-          saveThresholds();
-        }
-      });
+  document.addEventListener("DOMContentLoaded", function() {
+    // Load timelapse configuration on page load
+    loadTimelapseConfig();
 
-      document.getElementById("increment-btn").addEventListener("click", function() {
-        const sensorLevelInput = document.getElementById("sensor-level");
-        let currentValue = parseFloat(sensorLevelInput.value) || 0;
-        if (currentValue < 100) {
-          currentValue++;
-          sensorLevelInput.value = currentValue + '%';
-          
-          // Save thresholds after changing
-          saveThresholds();
-        }
-      });
+    // Existing code to load thresholds and other configurations
+    loadThresholds();
 
-      // Similarly for pH thresholds:
-      document.getElementById("decrement-ph-min").addEventListener("click", function() {
-        const phMinInput = document.getElementById("ph-min");
-        let currentValue = parseFloat(phMinInput.value) || 0;
-        currentValue = Math.max(0, currentValue - 0.1);
-        phMinInput.value = currentValue.toFixed(1);
+    // Modify existing event listeners to save thresholds to server
+    document.getElementById("decrement-btn").addEventListener("click", function() {
+      const sensorLevelInput = document.getElementById("sensor-level");
+      let currentValue = parseFloat(sensorLevelInput.value) || 0;
+      if (currentValue > 0) {
+        currentValue--;
+        sensorLevelInput.value = currentValue + '%';
         
         // Save thresholds after changing
         saveThresholds();
-      });
-      document.getElementById("increment-ph-min").addEventListener("click", function() {
-        const phMinInput = document.getElementById("ph-min");
-        let currentValue = parseFloat(phMinInput.value) || 0;
-        currentValue += 0.1;
-        phMinInput.value = currentValue.toFixed(1);
-        
-        // Save thresholds after changing
-        saveThresholds();
-      });
-      document.getElementById("decrement-ph-max").addEventListener("click", function() {
-        const phMaxInput = document.getElementById("ph-max");
-        let currentValue = parseFloat(phMaxInput.value) || 0;
-        currentValue = Math.max(0, currentValue - 0.1);
-        phMaxInput.value = currentValue.toFixed(1);
-        
-        // Save thresholds after changing
-        saveThresholds();
-      });
-      document.getElementById("increment-ph-max").addEventListener("click", function() {
-        const phMaxInput = document.getElementById("ph-max");
-        let currentValue = parseFloat(phMaxInput.value) || 0;
-        currentValue += 0.1;
-        phMaxInput.value = currentValue.toFixed(1);
-        
-        // Save thresholds after changing
-        saveThresholds();
-      });
-      
-      // Add event listener for the Fill Tank button
-      document.getElementById("fillTankButton").addEventListener("click", function() {
-        fillTank();
-      });
-      
-      // Initialize gauge on page load
-      updateGauge();
-      
-      // Update gauge periodically
-      setInterval(updateGauge, 10000);
+      }
     });
 
-    // Email Management Functions
-    document.addEventListener('DOMContentLoaded', function() {
-      // Load registered emails
-      loadRegisteredEmails();
+    document.getElementById("increment-btn").addEventListener("click", function() {
+      const sensorLevelInput = document.getElementById("sensor-level");
+      let currentValue = parseFloat(sensorLevelInput.value) || 0;
+      if (currentValue < 100) {
+        currentValue++;
+        sensorLevelInput.value = currentValue + '%';
+        
+        // Save thresholds after changing
+        saveThresholds();
+      }
+    });
+
+    // Similarly for pH thresholds:
+    document.getElementById("decrement-ph-min").addEventListener("click", function() {
+      const phMinInput = document.getElementById("ph-min");
+      let currentValue = parseFloat(phMinInput.value) || 0;
+      currentValue = Math.max(0, currentValue - 0.1);
+      phMinInput.value = currentValue.toFixed(1);
       
-      // Function to load registered emails
-      function loadRegisteredEmails() {
-        fetch('/get_emails')
-          .then(response => response.json())
-          .then(data => {
-            const emailListContainer = document.getElementById('email-list');
-            
-            if (data.status === 'success' && Array.isArray(data.emails)) {
-              if (data.emails.length > 0) {
-                // Display emails
-                emailListContainer.innerHTML = '';
-                data.emails.forEach(email => {
-                  const emailItem = document.createElement('div');
-                  emailItem.className = 'email-item';
-                  
-                  const emailText = document.createElement('div'); // Changed back to div for better block layout
-                  emailText.className = 'email-text';
-                  emailText.textContent = email;
-                  
-                  const removeButton = document.createElement('button');
-                  removeButton.className = 'remove-email';
-                  removeButton.textContent = 'Remove';
-                  removeButton.setAttribute('data-email', email);
-                  removeButton.addEventListener('click', function() {
-                    removeEmail(email);
-                  });
-                  
-                  emailItem.appendChild(emailText);
-                  emailItem.appendChild(removeButton);
-                  emailListContainer.appendChild(emailItem);
-                });
-              } else {
-                // No emails registered
-                emailListContainer.innerHTML = '<div class="no-emails">No emails registered for alerts.</div>';
-              }
-            } else {
-              // Error loading emails
-              emailListContainer.innerHTML = '<div class="no-emails">Error loading registered emails.</div>';
-            }
-          })
-          .catch(error => {
-            console.error('Error loading emails:', error);
-            const emailListContainer = document.getElementById('email-list');
-            emailListContainer.innerHTML = '<div class="no-emails">Error loading registered emails. Please try again.</div>';
-          });
-      }      
-      // Function to remove an email
-      function removeEmail(email) {
-        if (!confirm(`Are you sure you want to remove ${email}?`)) {
-          return;
-        }
-        
-        const formData = new FormData();
-        formData.append('email', email);
-        
-        fetch('/remove_email', {
-          method: 'POST',
-          body: formData
-        })
+      // Save thresholds after changing
+      saveThresholds();
+    });
+    document.getElementById("increment-ph-min").addEventListener("click", function() {
+      const phMinInput = document.getElementById("ph-min");
+      let currentValue = parseFloat(phMinInput.value) || 0;
+      currentValue += 0.1;
+      phMinInput.value = currentValue.toFixed(1);
+      
+      // Save thresholds after changing
+      saveThresholds();
+    });
+    document.getElementById("decrement-ph-max").addEventListener("click", function() {
+      const phMaxInput = document.getElementById("ph-max");
+      let currentValue = parseFloat(phMaxInput.value) || 0;
+      currentValue = Math.max(0, currentValue - 0.1);
+      phMaxInput.value = currentValue.toFixed(1);
+      
+      // Save thresholds after changing
+      saveThresholds();
+    });
+    document.getElementById("increment-ph-max").addEventListener("click", function() {
+      const phMaxInput = document.getElementById("ph-max");
+      let currentValue = parseFloat(phMaxInput.value) || 0;
+      currentValue += 0.1;
+      phMaxInput.value = currentValue.toFixed(1);
+      
+      // Save thresholds after changing
+      saveThresholds();
+    });
+    
+    // Add event listener for the Fill Tank button
+    document.getElementById("fillTankButton").addEventListener("click", function() {
+      fillTank();
+    });
+    
+    // Initialize gauge on page load
+    updateGauge();
+    
+    // Update gauge periodically
+    setInterval(updateGauge, 10000);
+  });
+
+  // Email Management Functions
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load registered emails
+    loadRegisteredEmails();
+    
+    // Function to load registered emails
+    function loadRegisteredEmails() {
+      fetch('/get_emails')
         .then(response => response.json())
         .then(data => {
-          if (data.status === 'success') {
-            // Success - just refresh the email list without showing an alert
-            loadRegisteredEmails();
+          const emailListContainer = document.getElementById('email-list');
+          
+          if (data.status === 'success' && Array.isArray(data.emails)) {
+            if (data.emails.length > 0) {
+              // Display emails
+              emailListContainer.innerHTML = '';
+              data.emails.forEach(email => {
+                const emailItem = document.createElement('div');
+                emailItem.className = 'email-item';
+                
+                const emailText = document.createElement('div'); // Changed back to div for better block layout
+                emailText.className = 'email-text';
+                emailText.textContent = email;
+                
+                const removeButton = document.createElement('button');
+                removeButton.className = 'remove-email';
+                removeButton.textContent = 'Remove';
+                removeButton.setAttribute('data-email', email);
+                removeButton.addEventListener('click', function() {
+                  removeEmail(email);
+                });
+                
+                emailItem.appendChild(emailText);
+                emailItem.appendChild(removeButton);
+                emailListContainer.appendChild(emailItem);
+              });
+            } else {
+              // No emails registered
+              emailListContainer.innerHTML = '<div class="no-emails">No emails registered for alerts.</div>';
+            }
           } else {
-            // Still show error messages
-            alert('Error: ' + data.message);
+            // Error loading emails
+            emailListContainer.innerHTML = '<div class="no-emails">Error loading registered emails.</div>';
           }
         })
         .catch(error => {
-          console.error('Error removing email:', error);
-          alert('An error occurred while removing the email. Please try again.');
+          console.error('Error loading emails:', error);
+          const emailListContainer = document.getElementById('email-list');
+          emailListContainer.innerHTML = '<div class="no-emails">Error loading registered emails. Please try again.</div>';
         });
+    }      
+    // Function to remove an email
+    function removeEmail(email) {
+      if (!confirm(`Are you sure you want to remove ${email}?`)) {
+        return;
       }
+      
+      const formData = new FormData();
+      formData.append('email', email);
+      
+      fetch('/remove_email', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Success - just refresh the email list without showing an alert
+          loadRegisteredEmails();
+        } else {
+          // Still show error messages
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error removing email:', error);
+        alert('An error occurred while removing the email. Please try again.');
+      });
+    }
+  });
+
+  // Timelapse Configuration
+
+  document.getElementById("save-config-btn").addEventListener("click", function() {
+    const hoursToRun = document.getElementById("hours-to-run").value;
+    const imagesPerHour = document.getElementById("images-per-hour").value;
+
+    const config = {
+      hours_to_run: hoursToRun,
+      images_per_hour: imagesPerHour
+    };
+
+    fetch('/save_timelapse_config', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === "success") {
+        alert("Configuration saved successfully");
+      } else {
+        alert("Error saving configuration: " + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error saving configuration:', error);
+      alert("Error saving configuration. Please try again.");
     });
+  });
   </script>
 </body>
 </html>
