@@ -10,6 +10,7 @@ import socket
 import pickle
 import struct
 import smtplib
+import json
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -54,6 +55,8 @@ except Exception as e:
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey123'  # Needed for session management
+
+timelapse_config_file = 'static/timelapse-config.json'
 
 # Camera setup
 camera = None
@@ -752,6 +755,27 @@ def threshold_monitor():
             print(f"Error in threshold monitor: {e}")
         
         time.sleep(300)  # Check every minute - this is the delay between checks
+
+@app.route('/save_timelapse_config', methods=['POST'])
+def save_timelapse_config():
+    try:
+        data = request.json
+        with open(timelapse_config_file, 'w') as f:
+            json.dump(data, f, indent=4)
+        return jsonify({"status": "success", "message": "Configuration saved successfully"}), 200
+    except Exception as e:
+        print(f"Error saving configuration: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/timelapse-config.json')
+def get_timelapse_config():
+    try:
+        with open(timelapse_config_file, 'r') as f:
+            config = json.load(f)
+        return jsonify(config)
+    except Exception as e:
+        print(f"Error reading configuration: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # Main Execution
 if __name__ == '__main__':
