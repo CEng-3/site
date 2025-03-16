@@ -345,24 +345,27 @@
 
     .email-form {
       display: flex;
-      justify-content: center;
-      gap: 0.5rem;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
       max-width: 500px;
       margin: 0 auto;
     }
 
     .email-form input[type="email"] {
-      flex: 1;
+      width: 100%;
       min-width: 200px;
     }
 
     .email-form button {
-      padding: 0.5rem 1rem;
+      padding: 0.5rem 1.5rem;
       border-radius: 0.25rem;
       background-color: #007bff;
       color: white;
       border: none;
       cursor: pointer;
+      width: auto;
+      min-width: 150px;
     }
 
     .email-form button:hover {
@@ -641,7 +644,7 @@
     <!-- Email Registration Section -->
     <section class="email-registration">
       <h3>Register for Notification Alerts</h3>
-      <p>Recieve an email when water levels or pH readings are outside their thresholds.</p>
+      <p>Recieve an email when water levels or pH readings are outside their thresholds.<br>(Emails might appear in junk folder!)</p>
       <form class="email-form" id="email-registration-form">
         <input type="email" id="notification-email" placeholder="Email Address" required>
         <button type="submit">Subscribe</button>

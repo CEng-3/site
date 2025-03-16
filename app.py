@@ -661,9 +661,7 @@ def check_thresholds_and_notify():
         print(f"Water violation #{water_violations} detected: {water_level}% is below threshold {water_threshold}%")
     else:
         water_violations = 0
-        if water_notification_sent:
-            water_notification_sent = False
-            print("Water level returned to normal, water notification flag reset")
+        # Removed the code that resets water_notification_sent flag
     
     # Check for pH violations
     if ph_value < ph_min or ph_value > ph_max:
@@ -671,9 +669,7 @@ def check_thresholds_and_notify():
         print(f"pH violation #{ph_violations} detected: {ph_value} is outside range {ph_min}-{ph_max}")
     else:
         ph_violations = 0
-        if ph_notification_sent:
-            ph_notification_sent = False
-            print("pH level returned to normal, pH notification flag reset")
+        # Removed the code that resets ph_notification_sent flag
     
     # Check if we need to send water notification
     if water_violations == 5 and not water_notification_sent:
