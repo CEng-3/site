@@ -1101,6 +1101,7 @@
         const source = document.createElement('source');
         source.src = `/static/${camera}/${videoName}?t=${timestamp}`;
         source.type = 'video/mp4';
+        videoElement.innerHTML = ''; // Clear previous sources
         videoElement.appendChild(source);
         videoElement.load();
       }
