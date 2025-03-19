@@ -174,3 +174,4 @@ cython_debug/
 # Project specific files
 key.txt
 secret.txt
+ap_pw.txt

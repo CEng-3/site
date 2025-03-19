@@ -612,7 +612,7 @@ def send_notification_emails(subject, message):
         smtp_server = "smtp.gmail.com"  # Example for Gmail
         smtp_port = 587
         smtp_username = "tustower@gmail.com"  # Replace with your email
-        smtp_password = "btlh zeta osun kwxq"  # Replace with your app password (not your regular password)
+        smtp_password = authentication.get_app_password()  # Use the app password
         
         # Create connection
         server = smtplib.SMTP(smtp_server, smtp_port)
