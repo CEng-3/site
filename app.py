@@ -10,7 +10,9 @@ import socket
 import pickle
 import struct
 import smtplib
-import json
+import hashlib
+
+import authentication
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -54,7 +56,7 @@ except Exception as e:
     water_sensor_available = False
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey123'  # Needed for session management
+app.secret_key = authentication.get_secret_key()
 
 # Camera setup
 camera = None
@@ -233,7 +235,10 @@ def settings():
     
     if request.method == 'POST':
         password = request.form.get('password')
-        if password == 'aerotower123':
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()  # Hash the inputted password
+        stored_password_hash = authentication.get_password_hash()  # Get the stored hashed password
+        
+        if hashed_password == stored_password_hash:  # Compare the hashes
             session['authenticated'] = True
             return redirect(url_for('settings'))
         else:
@@ -607,7 +612,7 @@ def send_notification_emails(subject, message):
         smtp_server = "smtp.gmail.com"  # Example for Gmail
         smtp_port = 587
         smtp_username = "tustower@gmail.com"  # Replace with your email
-        smtp_password = "btlh zeta osun kwxq"  # Replace with your app password (not your regular password)
+        smtp_password = authentication.get_app_password()  # Use the app password
         
         # Create connection
         server = smtplib.SMTP(smtp_server, smtp_port)

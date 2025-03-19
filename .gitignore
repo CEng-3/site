@@ -170,3 +170,8 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 .DS_Store
+
+# Project specific files
+key.txt
+secret.txt
+ap_pw.txt
