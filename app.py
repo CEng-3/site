@@ -148,48 +148,62 @@ def gen_frames():
                    b'Content-Type: image/jpeg\r\n\r\n' +
                    get_fallback_frame() + b'\r\n')
             time.sleep(0.2)
-            
+
 def receive_frames():
     """Connect to Pi B and receive the camera feed."""
     PI_B_IP = "192.168.64.120"
     PORT = 4050
-    data = b""
-    payload_size = struct.calcsize("Q")
-
+    
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.settimeout(5)  # Avoid long hangs if Pi B is unreachable
+        client_socket.settimeout(5)
         client_socket.connect((PI_B_IP, PORT))
-
+        
+        data = b""
+        payload_size = struct.calcsize("Q")
+        
         while True:
-            while len(data) < payload_size:
-                packet = client_socket.recv(4096)
-                if not packet:
-                    raise ConnectionError("Disconnected from Pi B")
-                data += packet
-
-            packed_msg_size = data[:payload_size]
-            data = data[payload_size:]
-            msg_size = struct.unpack("Q", packed_msg_size)[0]
-
-            while len(data) < msg_size:
-                data += client_socket.recv(4096)
-
-            frame_data = data[:msg_size]
-            data = data[msg_size:]
-
-            frame = pickle.loads(frame_data)
-            _, buffer = cv2.imencode('.jpg', frame)
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' +
-                   buffer.tobytes() + b'\r\n')
+            try:
+                while len(data) < payload_size:
+                    packet = client_socket.recv(4096)
+                    if not packet:
+                        raise ConnectionError("Disconnected from Pi B")
+                    data += packet
+                
+                packed_msg_size = data[:payload_size]
+                data = data[payload_size:]
+                msg_size = struct.unpack("Q", packed_msg_size)[0]
+                
+                while len(data) < msg_size:
+                    data += client_socket.recv(4096)
+                
+                frame_data = data[:msg_size]
+                data = data[msg_size:]
+                
+                frame = pickle.loads(frame_data)
+                _, buffer = cv2.imencode('.jpg', frame)
+                
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' +
+                       buffer.tobytes() + b'\r\n')
+                
+            except Exception as e:
+                print(f"Error receiving frame: {e}")
+                client_socket.close()
+                # Reconnect
+                time.sleep(1)
+                client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client_socket.settimeout(5)
+                client_socket.connect((PI_B_IP, PORT))
+                data = b""
+                
     except Exception as e:
         print(f"[WARNING] Failed to connect to Pi B: {e}")
         while True:
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' +
-                   get_fallback_frame() + b'\r\n')  # Show fallback image
+                   get_fallback_frame() + b'\r\n')
+            time.sleep(0.2)            
 
 # Flask Routes
 @app.route('/')
