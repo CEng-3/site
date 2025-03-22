@@ -323,7 +323,7 @@ def background_sensor_logger():
                 
                 # Write to CSV with the corrected date format: DD-MM-YYYY
                 try:
-                    with open('ph_hourly.csv', 'a', newline='') as csvfile:
+                    with open('static/data/ph_hourly.csv', 'a', newline='') as csvfile:
                         writer = csv.writer(csvfile)
                         writer.writerow([
                             next_hour.strftime('%d-%m-%Y'),  # Changed from '%Y-%m-%d' to '%d-%m-%Y'
@@ -352,7 +352,7 @@ def get_csv_data():
     today = datetime.date.today()
     
     try:
-        with open('ph_hourly.csv', 'r') as csvfile:
+        with open('static/data/ph_hourly.csv', 'r') as csvfile:
             reader = csv.DictReader(csvfile)  # Use DictReader for more robust parsing
             for row in reader:
                 rec_date = datetime.datetime.strptime(row['Date'], '%d-%m-%Y').date()
@@ -388,7 +388,7 @@ def download():
     today = datetime.date.today()
     
     try:
-        with open('ph_hourly.csv', 'r') as csvfile:
+        with open('static/data/ph_hourly.csv', 'r') as csvfile:
             reader = csv.DictReader(csvfile)  # Use DictReader to handle headers
             
             for row in reader:
@@ -443,7 +443,7 @@ import csv
 import os
 
 # Add these globals near the other global variables
-thresholds_file = 'thresholds.csv'
+thresholds_file = 'static/data/thresholds.csv'
 
 # Initialize thresholds with default values
 def initialize_thresholds():
@@ -496,7 +496,7 @@ def save_thresholds():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # Define the path for the latest readings CSV file
-latest_readings_file = 'latest_readings.csv'
+latest_readings_file = 'static/data/latest_readings.csv'
 
 # Function to save the latest sensor readings to CSV
 def save_latest_readings(ph_value, water_value):
@@ -541,7 +541,7 @@ def initial_readings():
     return jsonify(get_latest_readings())
 
 # Define the path for the emails CSV file
-emails_file = 'registered_emails.csv'
+emails_file = 'static/data/registered_emails.csv'
 
 # Violation tracking variables - update these
 water_violations = 0
@@ -783,7 +783,7 @@ if __name__ == '__main__':
     
     # Ensure CSV file exists with headers if it doesn't
     try:
-        with open('ph_hourly.csv', 'a', newline='') as csvfile:
+        with open('static/data/ph_hourly.csv', 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
             # Check if file is empty, if so, write headers
             csvfile.seek(0, os.SEEK_END)

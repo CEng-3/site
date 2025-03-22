@@ -175,3 +175,8 @@ cython_debug/
 key.txt
 secret.txt
 ap_pw.txt
+
+latest_readings.csv
+ph_hourly.csv
+registered_emails.csv
+thresholds.csv

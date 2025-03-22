@@ -8,162 +8,27 @@
   <!-- Pico.css -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="tus-icon.ico">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
-  <style>
-    .site-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px;
-    }
-    .header-underline {
-        width: 275px; /* adjust width as needed */
-        margin: -2.8rem 0 5rem 0;
-        border-bottom: 1px solid #dee2e6;
-      }
-    .logo img {
-      width: 120px;
-      height: 48px;
-    }
-
-    /* Background image styling */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url("{{ url_for('static', filename='background.jpg') }}");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      opacity: 0.05; /* Adjust transparency level as needed */
-      z-index: -1;
-    }
-
-    /* For mobile devices - adjust background position if needed */
-    @media (max-width: 768px) {
-      body::before {
-        background-position: center center;
-      }
-    }
-    .close-button {
-      font-size: 1.5rem;
-      cursor: pointer;
-      transition: color 0.3s ease;
-      text-decoration: none;
-    }
-    .close-button:hover i {
-      color: red !important;
-    }
-
-    /* Dark theme overrides (background color left to system) */
-    @media (prefers-color-scheme: dark) {
-      input, a {
-        color: #e0e0e0;
-        border: 1px solid #444;
-      }
-      /* Remove borders and outlines for logo and close button in dark mode */
-      .logo, .close-button {
-        border: none !important;
-        outline: none !important;
-      }
-      .close-button i {
-        color: #fff;
-      }
-      .alert-popup {
-        background-color: #b00020;
-        color: #fff;
-        border-color: #b00020;
-      }
-    }
-
-    /* Base styling matching Sensor History's "Download" button */
-    .btn-history {
-      text-decoration: none;
-      color: inherit; /* Overridden below */
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 1.25rem;
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem;
-      border: 2px solid #ccc;
-      background-color: transparent;
-      transition: background-color 0.2s ease, border-color 0.2s ease;
-      cursor: pointer;
-    }
-    /* Override bottom margin so it’s closer to the input */
-    .btn-download {
-      margin-bottom: 0 !important;
-    }
-    /* Blue highlight and text/icon color */
-    .btn-login {
-      border-color: #2196F3;
-      color: #2196F3 !important; /* make icon & text blue */
-      float: right;  /* Moves the button to the right */
-    }
-    .btn-login:hover {
-      background-color: rgba(33, 150, 243, 0.1);
-      border-color: #2196F3;
-    }
-    /* A small gap above the button so it's on its own line */
-    .login-button-gap {
-      margin-top: 0.5rem;
-    }
-
-    /* Styles for the incorrect password popup */
-    .alert-popup {
-      position: fixed;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 1.5rem 2rem;
-      background-color: #f44336;
-      color: #fff;
-      border: 2px solid #f44336;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      z-index: 1000;
-      animation: slideDown 0.5s ease-out;
-    }
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translate(-50%, -20%);
-      }
-      to {
-        opacity: 1;
-        transform: translate(-50%, 0);
-      }
-    }
-    .close-alert {
-      position: absolute;
-      top: 8px;
-      right: 12px;
-      cursor: pointer;
-      font-size: 1.2rem;
-    }
-  </style>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"> 
 </head>
 <body>
   <header class="site-header">
     <a href="#" class="logo">
       <picture>
         <source
-          srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}"
+          srcset="{{ url_for('static', filename='images/TUS-Logo-White.png') }}"
           media="(prefers-color-scheme: dark)"
         />
         <source
-          srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
+          srcset="{{ url_for('static', filename='images/TUS-Logo-Black.png') }}"
           media="(prefers-color-scheme: light)"
         />
         <img
-          src="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
+          src="{{ url_for('static', filename='images/TUS-Logo-Black.png') }}"
           alt="TUS Logo"
         />
       </picture>

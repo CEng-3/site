@@ -9,7 +9,7 @@ class DFRobot_PH():
 		global neutralVoltage
 		
 		try:
-			with open('phdata.txt','r') as f:
+			with open('static/data/phdata.txt','r') as f:
 				neutralVoltageLine = f.readline()
 				neutralVoltageLine = neutralVoltageLine.strip('neutralVoltage=')
 				neutralVoltage    = float(neutralVoltageLine)
