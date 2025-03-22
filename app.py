@@ -127,6 +127,7 @@ def gen_frames():
         while True:
             try:
                 im = camera.capture_array()
+                im = cv2.flip(im, -1) # Flip image vertically
                 _, buffer = cv2.imencode('.jpg', im)
                 frame = buffer.tobytes()
                 
