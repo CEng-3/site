@@ -43,9 +43,9 @@ create_password_hash() {
     fi
 
     echo "Hashing password..."
-    echo -n "$PASSWORD" | openssl dgst -sha256 -hex | sed 's/^.* //' > "$SECRETS_FILE"
-    chmod 600 "$SECRETS_FILE"
-    echo "Password hash saved to $SECRETS_FILE"
+    echo -n "$PASSWORD" | openssl dgst -sha256 -hex | sed 's/^.* //' > "$SECRET_FILE"
+    chmod 600 "$SECRET_FILE"
+    echo "Password hash saved to $SECRET_FILE"
 }
 
 # Function to create or update app password
@@ -70,7 +70,7 @@ create_app_password() {
 
 # Function to verify existing password
 verify_password() {
-    if [ ! -f "$SECRETS_FILE" ]; then
+    if [ ! -f "$SECRET_FILE" ]; then
         return 1  # No password file exists
     fi
 
@@ -80,7 +80,7 @@ verify_password() {
 
     # Hash the provided password
     CURRENT_HASH=$(echo -n "$CURRENT_PASSWORD" | openssl dgst -sha256 -hex | sed 's/^.* //')
-    STORED_HASH=$(cat "$SECRETS_FILE")
+    STORED_HASH=$(cat "$SECRET_FILE")
 
     if [ "$CURRENT_HASH" = "$STORED_HASH" ]; then
         return 0  # Password correct
@@ -105,7 +105,7 @@ else
 fi
 
 # Check if password file exists and handle accordingly
-if [ -f "$SECRETS_FILE" ]; then
+if [ -f "$SECRET_FILE" ]; then
     echo "Password file already exists."
         if verify_password; then
             echo "Password verified."
