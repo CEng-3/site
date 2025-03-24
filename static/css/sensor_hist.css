@@ -1,0 +1,378 @@
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px 20px 20px;
+}
+
+.logo img {
+    width: 120px;
+    height: 48px;
+}
+
+/* Background image styling */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("/static/images/background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.05;
+    /* Adjust transparency level as needed */
+    z-index: -1;
+}
+
+/* For mobile devices - adjust background position if needed */
+@media (max-width: 768px) {
+    body::before {
+        background-position: center center;
+    }
+}
+
+/* Page-level Close (X) button */
+.close-button {
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover i {
+    color: red !important;
+}
+
+/* Header styling for title and underline */
+header {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.header-title {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.header-underline {
+    width: 80%;
+    max-width: 500px;
+    margin: 0.25rem auto 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Button container styling */
+.history-btn-container {
+    text-align: center;
+    margin: 0.5rem 0;
+}
+
+.btn-history {
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    border: 2px solid #ccc;
+    background-color: transparent;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-history:hover {
+    background-color: rgba(100, 100, 100, 0.1);
+    border-color: #ccc;
+}
+
+/* Add spacing below the Download button */
+.btn-download {
+    margin-bottom: 1rem;
+}
+
+/* Toggle switch styling */
+.toggle-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.history-btn-container {
+    /* Use flex layout in column direction to stack items */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* centers them horizontally */
+    margin: 0.5rem 0;
+}
+
+.toggle-container {
+    /* Keep the toggle icons in a row inside this container, but it’ll be stacked
+       * as one "block" above the download button. */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    /* add spacing under toggle */
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #2196F3;
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+/* Filter section styling */
+.filter-section {
+    margin: 0.5rem auto;
+    max-width: 500px;
+    text-align: left;
+    text-indent: 5px;
+}
+
+.filter-section label {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.filter-section select {
+    padding: 0.4rem;
+    font-size: 1rem;
+}
+
+/* Modal container (common) */
+.modal {
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Modal content */
+.modal-content {
+    padding: 1.5rem;
+    border-radius: 4px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Modal header */
+.modal-header {
+    position: relative;
+    margin-bottom: 1rem;
+    padding-top: 3rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1;
+    text-align: center;
+}
+
+.modal-underline {
+    width: 80%;
+    max-width: 500px;
+    margin: 0.5rem auto 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+}
+
+.modal-close:focus {
+    outline: 2px auto #fff;
+    outline-offset: 0;
+}
+
+.modal-close:hover i {
+    color: red !important;
+}
+
+/* Labels and inputs */
+.modal-content label {
+    display: block;
+    margin: 0.5rem 0 0.25rem;
+    font-weight: bold;
+}
+
+.modal-content input[type="text"] {
+    border: 1px solid;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Green Apply button */
+.btn-apply {
+    margin: 0.5rem auto;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+}
+
+.btn-apply:hover {
+    background-color: #218838;
+}
+
+/* Flatpickr calendar z-index */
+.flatpickr-calendar {
+    z-index: 99999 !important;
+}
+
+.centered-popup {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+}
+
+/* Light theme overrides */
+@media (prefers-color-scheme: light) {
+    .modal-content {
+        background-color: #fff;
+        color: #000;
+    }
+
+    .modal-content input[type="text"] {
+        background-color: #fff;
+        color: #000;
+        border-color: #ccc;
+    }
+
+    .modal-header h2 {
+        color: #000;
+    }
+
+    .modal-close i,
+    .close-button i {
+        color: #000;
+    }
+
+    .modal-content label {
+        color: #444;
+    }
+}
+
+/* Dark theme overrides */
+@media (prefers-color-scheme: dark) {
+    .modal-content {
+        background-color: #2a2a2a;
+        color: #f0f0f0;
+    }
+
+    .modal-content input[type="text"] {
+        background-color: #111;
+        color: #fff;
+        border-color: #444;
+    }
+
+    .modal-header h2 {
+        color: #ddd;
+    }
+
+    .modal-close i,
+    .close-button i {
+        color: #fff;
+    }
+
+    .modal-content label {
+        color: #bbb;
+    }
+}
+
+/* Mobile improvements */
+@media (max-width: 600px) {
+    .modal-content {
+        width: 95%;
+        padding: 1rem;
+    }
+
+    .modal-content input[type="text"] {
+        font-size: 1rem;
+    }
+
+    .btn-apply {
+        font-size: 1rem;
+        padding: 0.5rem 0.75rem;
+    }
+}

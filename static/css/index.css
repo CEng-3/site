@@ -1,0 +1,533 @@
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Logo styling */
+.logo {
+  transition: transform 0.3s ease;
+}
+
+.logo img {
+  width: 120px;
+  height: 48px;
+}
+
+/* Background image styling */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("/static/images/background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.05;
+  /* Adjust transparency level as needed */
+  z-index: -1;
+}
+
+/* For mobile devices - adjust background position if needed */
+@media (max-width: 768px) {
+  body::before {
+    background-position: center center;
+  }
+}
+
+/* Tabs */
+.tabs {
+  margin: 2rem 0;
+}
+
+.tabs nav {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.tabs ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tabs li {
+  margin-right: 1rem;
+}
+
+.tabs a {
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem 0.25rem 0 0;
+  transition: all 0.2s;
+}
+
+.tabs a.active,
+.tabs a:hover {
+  background: #f8f9fa;
+  border-bottom: 2px solid #007bff;
+}
+
+.tab-content {
+  display: none;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Camera feed grid */
+.camera-grid {
+  display: flex;
+  justify-content: center;
+}
+
+/* Settings icon styling */
+.settings-icon {
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+  color: var(--contrast);
+}
+
+.settings-icon:hover {
+  color: var(--primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.5rem;
+    margin-top: 2.5rem;
+  }
+}
+
+/* Tab text color adjustments */
+@media (prefers-color-scheme: light) {
+  .tabs a {
+    color: #000;
+  }
+
+  .camera-btn {
+    color: #333;
+  }
+
+  .camera-btn:not(.active) {
+    color: #666;
+  }
+
+  .tabs a.active,
+  .tabs a:hover {
+    background: #f8f9fa;
+    color: #000;
+    border-bottom: 2px solid #007bff;
+  }
+
+  h1 {
+    color: #000;
+  }
+
+  .tab-content h2,
+  .tab-content p {
+    color: #000;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .tabs a {
+    color: #fff;
+  }
+
+  .tabs a.active,
+  .tabs a:hover {
+    background: #555;
+    color: #fff;
+    border-bottom: 2px solid #007bff;
+  }
+}
+
+.notification-bar {
+  background-color: #ffc107;
+  /* Yellow background for warning */
+  color: #000;
+  /* Dark text */
+  padding: 0.75rem;
+  text-align: center;
+  margin-top: -2rem;
+  margin-bottom: 3rem;
+  border-radius: 0.25rem;
+  font-weight: bold;
+}
+
+.notification-bar i {
+  margin-right: 0.5rem;
+}
+
+/* 230° Arc Gauge Styling */
+.arc-gauge {
+  display: block;
+  margin: -2rem auto;
+  width: 325px;
+  height: 325px;
+}
+
+.arc-gauge .track {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.arc-gauge .progress {
+  fill: none;
+  stroke: #007bff;
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 160.57;
+  stroke-dashoffset: 160.57;
+  transition: stroke-dashoffset 1s ease;
+}
+
+.arc-gauge .percentage {
+  fill: #007bff;
+  font-size: 20px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.arc-gauge .gauge-subtext {
+  font-size: 8px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.history-btn-container {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.btn-history {
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: 2px solid #ccc;
+  background-color: transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-history:hover {
+  background-color: rgba(100, 100, 100, 0.1);
+  border-color: #ccc;
+}
+
+@media (prefers-color-scheme: light) {
+  .arc-gauge .track {
+    stroke: #ccc;
+  }
+
+  .arc-gauge .arc-subtext {
+    fill: #000;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .arc-gauge .track {
+    stroke: #444;
+  }
+
+  .arc-gauge .gauge-subtext {
+    fill: #fff;
+  }
+}
+
+/* New Camera Selector Styles */
+.camera-selector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.camera-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #ccc;
+  background-color: transparent;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.camera-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* Timelapse Grid Styles */
+.timelapse-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 0.5rem;
+}
+
+.timelapse-thumbnail {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.timelapse-thumbnail:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.timelapse-thumbnail img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.timelapse-thumbnail p {
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.date-group {
+  grid-column: 1 / -1;
+  font-weight: bold;
+  margin-top: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Email registration form styles */
+.email-registration {
+  margin-top: 3rem;
+  padding: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.email-registration h3 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.email-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.email-form input[type="email"] {
+  width: 100%;
+  min-width: 200px;
+}
+
+.email-form button {
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.25rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  width: auto;
+  min-width: 150px;
+}
+
+.email-form button:hover {
+  background-color: #0056b3;
+}
+
+.email-notification {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  display: none;
+}
+
+.email-notification.success {
+  color: #28a745;
+}
+
+.email-notification.error {
+  color: #dc3545;
+}
+
+/* Footer styles */
+.site-footer {
+  margin-top: 3rem;
+  padding: 1rem 0;
+  text-align: center;
+  font-size: 0.9rem;
+  border-top: 1px solid #dee2e6;
+}
+
+/* Video responsive styles */
+#timelapse-video {
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  display: block;
+  margin: 0 auto 1rem auto;
+  border-radius: 0.25rem;
+}
+
+/* Add a container with fixed aspect ratio for consistency */
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  #timelapse-video {
+    max-width: 100%;
+  }
+}
+
+/* Timelapse tab styling updates */
+.timelapse-players {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 2rem;
+}
+
+.video-container {
+  width: 100%;
+  max-width: 480px;
+}
+
+.video-container h3 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.timelapse-video {
+  width: 100%;
+  border-radius: 0.25rem;
+  background-color: #000;
+}
+
+.month-selector {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.month-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #ccc;
+  background-color: transparent;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.month-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.date-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.date-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #ccc;
+  background-color: transparent;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.video-unavailable {
+  text-align: center;
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem;
+  font-style: italic;
+  color: #666;
+}
+
+@media (max-width: 992px) {
+  .timelapse-players {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Date picker styling for timelapse */
+.date-picker-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+}
+
+.date-picker-container label {
+  font-weight: bold;
+}
+
+.date-picker {
+  padding: 0.5rem;
+  border: 2px solid #ccc;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  width: 150px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Flatpickr calendar z-index */
+.flatpickr-calendar {
+  z-index: 99999 !important;
+}
+
+.centered-popup {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+}

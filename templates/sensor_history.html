@@ -1,405 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sensor History</title>
-  
+
   <!-- Pico.css -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css"
-  />
-  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+
   <!-- Font Awesome for icons -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-  />
-  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
   <!-- Favicon -->
-  <link
-    rel="icon"
-    type="image/x-icon"
-    href="{{ url_for('static', filename='tus-icon.ico') }}"
-  />
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
 
   <!-- Flatpickr CSS -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-  />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
   <!-- Flatpickr - Dark theme -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css"
-    media="(prefers-color-scheme: dark)"
-  />
-  
-  <style>
-    .site-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 20px 20px 20px;
-    }
-    .logo img {
-      width: 120px;
-      height: 48px;
-    }
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css"
+    media="(prefers-color-scheme: dark)" />
 
-    /* Background image styling */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url("{{ url_for('static', filename='background.jpg') }}");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      opacity: 0.05; /* Adjust transparency level as needed */
-      z-index: -1;
-    }
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sensor_hist.css') }}">
 
-    /* For mobile devices - adjust background position if needed */
-    @media (max-width: 768px) {
-      body::before {
-        background-position: center center;
-      }
-    }
-
-    /* Page-level Close (X) button */
-    .close-button {
-      font-size: 1.5rem;
-      cursor: pointer;
-      transition: color 0.3s ease;
-    }
-    .close-button:hover i {
-      color: red !important;
-    }
-
-    /* Header styling for title and underline */
-    header {
-      text-align: center;
-      margin-top: 2rem;
-    }
-    .header-title {
-      margin: 0;
-      font-size: 2rem;
-    }
-    .header-underline {
-      width: 80%;
-      max-width: 500px;
-      margin: 0.25rem auto 1rem;
-      border-bottom: 1px solid #dee2e6;
-    }
-
-    /* Button container styling */
-    .history-btn-container {
-      text-align: center;
-      margin: 0.5rem 0;
-    }
-    .btn-history {
-      text-decoration: none;
-      color: inherit;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 1.25rem;
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem;
-      border: 2px solid #ccc;
-      background-color: transparent;
-      transition: background-color 0.2s ease, border-color 0.2s ease;
-      cursor: pointer;
-    }
-    .btn-history:hover {
-      background-color: rgba(100, 100, 100, 0.1);
-      border-color: #ccc;
-    }
-
-    /* Add spacing below the Download button */
-    .btn-download {
-      margin-bottom: 1rem;
-    }
-
-    /* Toggle switch styling */
-    .toggle-container {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-      .history-btn-container {
-        /* Use flex layout in column direction to stack items */
-        display: flex;
-        flex-direction: column;
-        align-items: center; /* centers them horizontally */
-        margin: 0.5rem 0;
-      }
-
-      .toggle-container {
-        /* Keep the toggle icons in a row inside this container, but it’ll be stacked
-           * as one "block" above the download button. */
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem; /* add spacing under toggle */
-      }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 24px;
-    }
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: 0.4s;
-      border-radius: 24px;
-    }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: 0.4s;
-      border-radius: 50%;
-    }
-    input:checked + .slider {
-      background-color: #2196F3;
-    }
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
-
-    /* Filter section styling */
-    .filter-section {
-      margin: 0.5rem auto;
-      max-width: 500px;
-      text-align: left;
-      text-indent: 5px;
-    }
-    .filter-section label {
-      font-weight: bold;
-      margin-right: 0.5rem;
-    }
-    .filter-section select {
-      padding: 0.4rem;
-      font-size: 1rem;
-    }
-
-    /* Modal container (common) */
-    .modal {
-      position: fixed;
-      z-index: 2000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Modal content */
-    .modal-content {
-      padding: 1.5rem;
-      border-radius: 4px;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-      box-sizing: border-box;
-      position: relative;
-    }
-
-    /* Modal header */
-    .modal-header {
-      position: relative;
-      margin-bottom: 1rem;
-      padding-top: 3rem;
-    }
-    .modal-header h2 {
-      margin: 0;
-      font-size: 1.25rem;
-      line-height: 1;
-      text-align: center;
-    }
-    .modal-underline {
-      width: 80%;
-      max-width: 500px;
-      margin: 0.5rem auto 1rem;
-      border-bottom: 1px solid #dee2e6;
-    }
-    .modal-close {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background: transparent;
-      border: none;
-      font-size: 1.25rem;
-      cursor: pointer;
-      transition: color 0.2s ease;
-      width: 1.5rem;
-      height: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-      padding: 0;
-    }
-    .modal-close:focus {
-      outline: 2px auto #fff;
-      outline-offset: 0;
-    }
-    .modal-close:hover i {
-      color: red !important;
-    }
-
-    /* Labels and inputs */
-    .modal-content label {
-      display: block;
-      margin: 0.5rem 0 0.25rem;
-      font-weight: bold;
-    }
-    .modal-content input[type="text"] {
-      border: 1px solid;
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    /* Green Apply button */
-    .btn-apply {
-      margin: 0.5rem auto;
-      background-color: #28a745;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 0.4rem 0.75rem;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.3rem;
-    }
-    .btn-apply:hover {
-      background-color: #218838;
-    }
-
-    /* Flatpickr calendar z-index */
-    .flatpickr-calendar {
-      z-index: 99999 !important;
-    }
-    .centered-popup {
-      position: fixed !important;
-      top: 50% !important;
-      left: 50% !important;
-      transform: translate(-50%, -50%) !important;
-      margin: 0 !important;
-    }
-
-    /* Light theme overrides */
-    @media (prefers-color-scheme: light) {
-      .modal-content {
-        background-color: #fff;
-        color: #000;
-      }
-      .modal-content input[type="text"] {
-        background-color: #fff;
-        color: #000;
-        border-color: #ccc;
-      }
-      .modal-header h2 {
-        color: #000;
-      }
-      .modal-close i, .close-button i {
-        color: #000;
-      }
-      .modal-content label {
-        color: #444;
-      }
-    }
-
-    /* Dark theme overrides */
-    @media (prefers-color-scheme: dark) {
-      .modal-content {
-        background-color: #2a2a2a;
-        color: #f0f0f0;
-      }
-      .modal-content input[type="text"] {
-        background-color: #111;
-        color: #fff;
-        border-color: #444;
-      }
-      .modal-header h2 {
-        color: #ddd;
-      }
-      .modal-close i, .close-button i {
-        color: #fff;
-      }
-      .modal-content label {
-        color: #bbb;
-      }
-    }
-
-    /* Mobile improvements */
-    @media (max-width: 600px) {
-      .modal-content {
-        width: 95%;
-        padding: 1rem;
-      }
-      .modal-content input[type="text"] {
-        font-size: 1rem;
-      }
-      .btn-apply {
-        font-size: 1rem;
-        padding: 0.5rem 0.75rem;
-      }
-    }
-  </style>
-
-<!-- Chart.js library for graphs -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js library for graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-  
+
   <header class="site-header">
-  <!-- Logo -->
-  <a href="#" class="logo">
+    <!-- Logo -->
+    <a href="#" class="logo">
       <picture>
-        <source
-          srcset="{{ url_for('static', filename='TUS-Logo-White.png') }}"
-          media="(prefers-color-scheme: dark)"
-        />
-        <source
-          srcset="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
-          media="(prefers-color-scheme: light)"
-        />
-        <img
-          src="{{ url_for('static', filename='TUS-Logo-Black.png') }}"
-          alt="TUS Logo"
-        />
+        <source srcset="{{ url_for('static', filename='images/TUS-Logo-White.png') }}" media="(prefers-color-scheme: dark)" />
+        <source srcset="{{ url_for('static', filename='images/TUS-Logo-Black.png') }}" media="(prefers-color-scheme: light)" />
+        <img src="{{ url_for('static', filename='imagesTUS-Logo-Black.png') }}" alt="TUS Logo" />
       </picture>
     </a>
 
@@ -408,13 +45,13 @@
       <i class="fas fa-times"></i>
     </a>
   </header>
-  
+
   <!-- Header -->
   <header>
     <h1 class="header-title">Sensor History</h1>
     <div class="header-underline"></div>
   </header>
-  
+
   <!-- Button container with the Download button above the toggle switch -->
   <div class="history-btn-container">
     <!-- Toggle switch container FIRST -->
@@ -436,7 +73,7 @@
       <i class="fas fa-download"></i> Download
     </a>
   </div>
-  
+
   <main class="container">
     <!-- Filter dropdown -->
     <section class="filter-section">
@@ -460,7 +97,7 @@
       <canvas id="waterChart"></canvas>
     </section>
   </main>
-  
+
   <!-- Modal for Custom Date Selection -->
   <div id="customModal" class="modal">
     <div class="modal-content">
@@ -471,13 +108,13 @@
         </button>
         <div class="modal-underline"></div>
       </div>
-      
+
       <label for="startDate">Start Date:</label>
       <input type="text" id="startDate" name="startDate" placeholder="Pick a date">
-      
+
       <label for="endDate">End Date:</label>
       <input type="text" id="endDate" name="endDate" placeholder="Pick a date">
-      
+
       <div>
         <button id="applyDates" class="btn-apply">
           <i class="fas fa-check"></i> Apply
@@ -487,203 +124,10 @@
   </div>
 
   <!-- Flatpickr JS -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js"
-    defer
-  ></script>
-  
-  <script>
-    // Toggle between Table and Graph views using the switch
-    document.getElementById('toggleViewSwitch').addEventListener('change', function() {
-      const tableContainer = document.getElementById('history-table-container');
-      const graphContainer = document.getElementById('graph-view-container');
-      if (this.checked) {
-        tableContainer.style.display = 'none';
-        graphContainer.style.display = 'block';
-      } else {
-        graphContainer.style.display = 'none';
-        tableContainer.style.display = 'block';
-      }
-    });
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js" defer></script>
 
-    // Listen for changes in the filter dropdown to show custom modal if needed
-    document.getElementById('filter').addEventListener('change', function() {
-      if (this.value === 'custom') {
-        document.getElementById('customModal').style.display = 'flex';
-      }
-    });
+  <script src="{{ url_for('static', filename='js/sensors.js') }}" defer></script>
 
-    // Close the modal when the X is clicked
-    document.getElementById('closeModal').addEventListener('click', function() {
-      document.getElementById('customModal').style.display = 'none';
-      document.getElementById('filter').value = 'today';
-    });
-
-    // Global variables for chart instances and current data
-    let phChart;
-    let waterChart;
-    let currentData = [];
-
-    // Function to build the table view
-    function buildTable(data) {
-      let html = '<table>';
-      html += '<thead><tr><th>Date</th><th>Time</th><th>pH</th><th>Water</th></tr></thead>';
-      html += '<tbody>';
-      data.forEach(row => {
-        html += `<tr>
-                    <td>${row.date}</td>
-                    <td>${row.time}</td>
-                    <td>${row.ph}</td>
-                    <td>${row.water}%</td>
-                  </tr>`;
-      });
-      html += '</tbody></table>';
-      document.getElementById('history-table-container').innerHTML = html;
-    }
-
-    // Function to update the graphs using Chart.js
-    function updateGraphs(data) {
-      // Assume each data row contains 'date', 'time', 'ph', and 'water'
-      const labels = data.map(row => `${row.date} ${row.time}`);
-      const phValues = data.map(row => parseFloat(row.ph));
-      const waterValues = data.map(row => parseFloat(row.water));
-
-      // pH chart
-      if (phChart) {
-        phChart.data.labels = labels;
-        phChart.data.datasets[0].data = phValues;
-        phChart.update();
-      } else {
-        const ctxPh = document.getElementById('phChart').getContext('2d');
-        phChart = new Chart(ctxPh, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'pH Level',
-              data: phValues,
-              borderColor: 'green',
-              backgroundColor: 'rgba(0, 255, 0, 0.1)',
-            }]
-          },
-          options: {
-            responsive: true,
-          }
-        });
-      }
-
-      // Water Level chart
-      if (waterChart) {
-        waterChart.data.labels = labels;
-        waterChart.data.datasets[0].data = waterValues;
-        waterChart.update();
-      } else {
-        const ctxWater = document.getElementById('waterChart').getContext('2d');
-        waterChart = new Chart(ctxWater, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Water Level',
-              data: waterValues,
-              borderColor: 'blue',
-              backgroundColor: 'rgba(0, 0, 255, 0.1)',
-            }]
-          },
-          options: {
-            responsive: true,
-          }
-        });
-      }
-    }
-
-    // Function to fetch data from the backend based on filter parameters
-    function fetchHistoryData(filter, startDate = '', endDate = '') {
-      let url = `/get_csv_data?filter=${filter}`;
-      if (filter === 'custom' && startDate && endDate) {
-        url += `&start=${startDate}&end=${endDate}`;
-      }
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          currentData = data;
-          buildTable(data);
-          updateGraphs(data);
-        })
-        .catch(err => console.error('Error fetching data:', err));
-    }
-
-    // Default fetch on page load (for "today")
-    window.addEventListener('load', () => {
-      fetchHistoryData('today');
-    });
-
-    // Listen for changes on the filter dropdown to fetch data
-    document.getElementById('filter').addEventListener('change', function() {
-      if (this.value === 'custom') {
-        document.getElementById('customModal').style.display = 'flex';
-      } else {
-        fetchHistoryData(this.value);
-      }
-    });
-
-    // Handle Apply button in the modal for custom date filtering
-    document.getElementById('applyDates').addEventListener('click', function() {
-      const startDateInput = document.getElementById('startDate').value;
-      const endDateInput = document.getElementById('endDate').value;
-      if (!startDateInput || !endDateInput) {
-        alert('Please select both start and end dates.');
-        return;
-      }
-      document.getElementById('customModal').style.display = 'none';
-      fetchHistoryData('custom', startDateInput, endDateInput);
-      updateDownloadLink();
-    });
-      
-    // Update download link based on filter and dates
-    function updateDownloadLink() {
-      const filter = document.getElementById('filter').value;
-      let url = `/download?filter=${filter}`;
-      if (filter === 'custom') {
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        if (startDate && endDate) {
-          url += `&start=${startDate}&end=${endDate}`;
-        }
-      }
-      document.getElementById('downloadBtn').href = url;
-    }
-
-    // Update download link when filter changes and on page load
-    document.getElementById('filter').addEventListener('change', updateDownloadLink);
-    window.addEventListener('load', updateDownloadLink);
-
-    // Initialize Flatpickr for date inputs
-    window.addEventListener('load', () => {
-      flatpickr('#startDate', {
-        dateFormat: 'd-m-Y',
-        disableMobile: true,
-        maxDate: 'today',
-        onOpen: (selectedDates, dateStr, instance) => {
-          instance.calendarContainer.classList.add('centered-popup');
-        },
-        onClose: (selectedDates, dateStr, instance) => {
-          instance.calendarContainer.classList.remove('centered-popup');
-        }
-      });
-
-      flatpickr('#endDate', {
-        dateFormat: 'd-m-Y',
-        disableMobile: true,
-        maxDate: 'today',
-        onOpen: (selectedDates, dateStr, instance) => {
-          instance.calendarContainer.classList.add('centered-popup');
-        },
-        onClose: (selectedDates, dateStr, instance) => {
-          instance.calendarContainer.classList.remove('centered-popup');
-        }
-      });
-    });
-  </script>
 </body>
+
 </html>
