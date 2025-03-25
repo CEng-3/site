@@ -15,7 +15,7 @@ document.querySelectorAll('.tabs a').forEach((tab) => {
             const month = (today.getMonth() + 1).toString().padStart(2, '0');
             const day = today.getDate().toString().padStart(2, '0');
             const dateStr = `${year}-${month}-${day}`;
-            const videoPath = `/static/${camera}/${videoName}`;
+            const videoPath = `/static/${camera === 'cam1' ? 'videos/pi' : 'videos/pi_'}/${videoName}`;
             const timestamp = new Date().getTime(); // cache busting
             video.innerHTML = `<source src="${videoPath}?t=${timestamp}" type="video/mp4">Your browser does not support the video tag.`;
             video.load();
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     thumbnailContainer.classList.add('timelapse-thumbnail');
 
                     const img = document.createElement('img');
-                    img.src = `/static/${camera}/${videoName.replace('.mp4', '.jpg')}`;
+                    img.src = `/static/${camera === 'cam1' ? 'videos/pi' : 'videos/pi_'}/${videoName.replace('.mp4', '.jpg')}`;
                     img.alt = `Timelapse ${videoName}`;
 
                     const videoLabel = document.createElement('p');
@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const videoName = `timelapse_${date}.mp4`;
         const timestamp = new Date().getTime(); // cache busting
         const source = document.createElement('source');
-        source.src = `/static/${camera}/${videoName}?t=${timestamp}`;
+        source.src = `/static/${camera === 'cam1' ? 'videos/pi' : 'videos/pi_'}/${videoName}?t=${timestamp}`;
         source.type = 'video/mp4';
         videoElement.innerHTML = ''; // Clear previous sources
         videoElement.appendChild(source);
