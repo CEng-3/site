@@ -274,9 +274,9 @@ def flash_led():
 def timelapse_list():
     camera = request.args.get('camera', 'cam1')
     if camera == 'cam1':
-        timelapse_dir = 'static/cam1'
+        timelapse_dir = 'static/videos/pi'
     elif camera == 'cam2':
-        timelapse_dir = 'static/cam2'
+        timelapse_dir = 'static/videos/pi_'
     else:
         return jsonify([])
 
