@@ -11,6 +11,9 @@ import pickle
 import struct
 import smtplib
 import hashlib
+import subprocess
+# pip install apscheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 
 import authentication
 from email.mime.text import MIMEText
@@ -78,6 +81,9 @@ if GPIO:
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(LED_PIN, GPIO.OUT)
 
+TIMELAPSE_DIR = 'static/images/timelapse'
+VIDEOS_DIR = 'static/videos/pi'
+
 # Fallback functions
 def get_ph_reading():
     if ph_sensor_available:
@@ -126,8 +132,9 @@ def gen_frames():
     if camera_available and cv2_available and camera:
         while True:
             try:
-                im = camera.capture_array()
-                im = cv2.flip(im, -1) # Flip image vertically
+                with camera_lock:
+                    im = camera.capture_array()
+                    im = cv2.flip(im, -1) # Flip image vertically
                 _, buffer = cv2.imencode('.jpg', im)
                 frame = buffer.tobytes()
                 
@@ -289,6 +296,7 @@ def logout():
     session.pop('authenticated', None)
     return redirect(url_for('index'))
 
+camera_lock = threading.Lock()
 # Data Logging and CSV Handling
 global_lock = threading.Lock()
 readings = []
@@ -774,6 +782,90 @@ def threshold_monitor():
         
         time.sleep(300)  # Check every minute - this is the delay between checks
 
+
+def capture_timelapse_frame():
+    """Capture a frame from the camera for timelapse"""
+    # Only capture during daylight hours (6:00 - 18:00)
+    current_hour = datetime.datetime.now().hour
+    if not (6 <= current_hour < 18):
+        return
+    
+    # Ensure timelapse directory exists
+    today_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    today_dir = os.path.join(TIMELAPSE_DIR, today_date)
+    os.makedirs(today_dir, exist_ok=True)
+    
+    try:
+        if camera_available and cv2_available and camera:
+            # Capture image from main camera
+            with camera_lock:
+                im = camera.capture_array()
+                im = cv2.flip(im, -1)  # Flip image vertically
+            
+            # Save image with timestamp
+            timestamp = datetime.datetime.now().strftime('%H-%M-%S')
+            filename = f"{today_dir}/frame_{timestamp}.jpg"
+            cv2.imwrite(filename, im)
+            print(f"Captured timelapse frame: {filename}")
+        else:
+            print("Camera not available for timelapse capture")
+    except Exception as e:
+        print(f"Error capturing timelapse frame: {e}")
+
+def create_timelapse_video():
+    """Create a timelapse video from today's captured frames"""
+    today_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    today_dir = os.path.join(TIMELAPSE_DIR, today_date)
+    
+    # Check if directory exists and contains images
+    if not os.path.exists(today_dir):
+        print(f"No timelapse directory for today ({today_dir})")
+        return
+        
+    frames = [f for f in os.listdir(today_dir) if f.endswith('.jpg')]
+    if not frames:
+        print(f"No frames captured today in {today_dir}")
+        return
+        
+    # Ensure videos directory exists
+    os.makedirs(VIDEOS_DIR, exist_ok=True)
+    
+    try:
+        # Create video using ffmpeg
+        output_video = f"{VIDEOS_DIR}/timelapse_{today_date}.mp4"
+        
+        # Use ffmpeg to create video (15 fps)
+        ffmpeg_cmd = [
+            'ffmpeg',
+            '-y',  # Overwrite output file if it exists
+            '-framerate', '15',
+            '-pattern_type', 'glob',
+            '-i', f"{today_dir}/frame_*.jpg",
+            '-c:v', 'libx264',
+            '-pix_fmt', 'yuv420p',
+            output_video
+        ]
+        
+        process = subprocess.Popen(
+            ffmpeg_cmd, 
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        stdout, stderr = process.communicate()
+        
+        if process.returncode == 0:
+            print(f"Timelapse video created successfully: {output_video}")
+            
+            # Optional: Remove the individual frames to save space
+            # for frame in frames:
+            #     os.remove(os.path.join(today_dir, frame))
+            
+        else:
+            print(f"Error creating timelapse video: {stderr.decode()}")
+    
+    except Exception as e:
+        print(f"Exception during timelapse creation: {e}")
+
 # Main Execution
 if __name__ == '__main__':
     print("Aeroponic Tower Garden Website Starting...")
@@ -809,6 +901,33 @@ if __name__ == '__main__':
     # Start the threshold monitor thread
     threshold_thread = threading.Thread(target=threshold_monitor, daemon=True)
     threshold_thread.start()
+    
+    # Initialize scheduler
+    scheduler = BackgroundScheduler()
+    
+    # Schedule timelapse frame capture every 15 minutes
+    scheduler.add_job(
+        capture_timelapse_frame,
+        'interval',
+        minutes=15,
+        id='timelapse_capture'
+    )
+    
+    # Schedule timelapse video creation at 18:00 daily
+    scheduler.add_job(
+        create_timelapse_video,
+        'cron',
+        hour=18,
+        minute=5,
+        id='timelapse_video_creation'
+    )
+    
+    # Start the scheduler
+    scheduler.start()
+    
+    # Ensure timelapse directories exist
+    os.makedirs(TIMELAPSE_DIR, exist_ok=True)
+    os.makedirs(VIDEOS_DIR, exist_ok=True)
     
     try:
         # Start the Flask app
